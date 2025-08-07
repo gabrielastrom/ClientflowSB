@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { upsertTeamMemberFromUser } from "@/services/teamService";
@@ -39,22 +39,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   React.useEffect(() => {
-    if (!auth) {
-      console.error("Firebase Auth is not initialized.");
-      setIsLoading(false);
-      return;
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
+      const user = session?.user ?? null;
       if (user) {
-        // Every time auth state changes, ensure the user profile exists in Firestore.
         await upsertTeamMemberFromUser(user);
       }
       setUser(user);
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   React.useEffect(() => {

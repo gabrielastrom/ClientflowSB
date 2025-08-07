@@ -1,86 +1,75 @@
-
-import { db } from '@/lib/firebase';
-import { collection, doc, getDocs, getDoc, setDoc, deleteDoc, query, where, onSnapshot } from 'firebase/firestore';
+import { supabase } from '@/lib/supabase';
 import type { KnowledgeBaseArticle as Article } from '@/lib/types';
 
-function getDb() {
-    if (!db) {
-        throw new Error('Firestore has not been initialized');
-    }
-    return db;
-}
+const TABLE = 'knowledge-base';
 
 function createSlug(title: string): string {
-    return title
-        .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^\w-]+/g, '');
+  return title
+    .toLowerCase()
+    .replace(/ /g, '-')
+    .replace(/[^\w-]+/g, '');
 }
 
 export function listenToArticles(callback: (articles: Article[]) => void): () => void {
-    try {
-        const unsubscribe = onSnapshot(collection(getDb(), 'knowledge-base'), (snapshot) => {
-            if (snapshot.empty) {
-                callback([]);
-                return;
-            }
-            const list = snapshot.docs.map(doc => doc.data() as Article);
-            callback(list);
-        });
-        return unsubscribe;
-    } catch (error) {
-        console.error("Error setting up articles listener: ", error);
-        throw new Error("Could not listen to articles.");
-    }
+  const channel = supabase
+    .channel('public:knowledge-base')
+    .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async () => {
+      const { data } = await supabase.from(TABLE).select('*');
+      callback(data ?? []);
+    })
+    .subscribe();
+
+  supabase
+    .from(TABLE)
+    .select('*')
+    .then(({ data }: { data: Article[] | null }) => callback(data ?? []));
+
+  return () => supabase.removeChannel(channel);
 }
 
 export async function addArticle(articleData: Omit<Article, 'id' | 'slug'>): Promise<Article> {
-    try {
-        const dbInstance = getDb();
-        const newId = doc(collection(dbInstance, 'knowledge-base')).id;
-        const slug = createSlug(articleData.title);
-        const newArticle: Article = { ...articleData, id: newId, slug };
-        await setDoc(doc(dbInstance, "knowledge-base", newId), newArticle);
-        return newArticle;
-    } catch (error) {
-        console.error("Error adding article: ", error);
-        throw new Error("Failed to add article.");
-    }
+  const slug = createSlug(articleData.title);
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert({ ...articleData, slug })
+    .select()
+    .single();
+  if (error) {
+    console.error('Error adding article: ', error);
+    throw new Error('Failed to add article.');
+  }
+  return data!;
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-    try {
-        const q = query(collection(getDb(), 'knowledge-base'), where("slug", "==", slug));
-        const snapshot = await getDocs(q);
-        if (snapshot.empty) {
-            console.log('No matching article found.');
-            return null;
-        }
-        return snapshot.docs[0].data() as Article;
-    } catch (error) {
-        console.error("Error fetching article by slug: ", error);
-        throw new Error("Could not fetch article.");
-    }
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (error) {
+    console.error('Error fetching article by slug: ', error);
+    throw new Error('Could not fetch article.');
+  }
+  return data;
 }
 
 export async function updateArticle(article: Article): Promise<void> {
-    try {
-        // If the title changed, the slug might need to change.
-        const newSlug = createSlug(article.title);
-        const articleWithSlug = { ...article, slug: newSlug };
-        const articleRef = doc(getDb(), "knowledge-base", article.id);
-        await setDoc(articleRef, articleWithSlug, { merge: true });
-    } catch (error) {
-        console.error("Error updating article: ", error);
-        throw new Error("Failed to update article.");
-    }
+  const newSlug = createSlug(article.title);
+  const { error } = await supabase
+    .from(TABLE)
+    .update({ ...article, slug: newSlug })
+    .eq('id', article.id);
+  if (error) {
+    console.error('Error updating article: ', error);
+    throw new Error('Failed to update article.');
+  }
 }
 
 export async function deleteArticle(articleId: string): Promise<void> {
-    try {
-        await deleteDoc(doc(getDb(), "knowledge-base", articleId));
-    } catch (error) {
-        console.error("Error deleting article: ", error);
-        throw new Error("Failed to delete article.");
-    }
+  const { error } = await supabase.from(TABLE).delete().eq('id', articleId);
+  if (error) {
+    console.error('Error deleting article: ', error);
+    throw new Error('Failed to delete article.');
+  }
 }

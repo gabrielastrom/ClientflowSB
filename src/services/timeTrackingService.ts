@@ -1,63 +1,50 @@
-
-import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { supabase } from '@/lib/supabase';
 import type { TimeEntry } from '@/lib/types';
 
-function getDb() {
-    if (!db) {
-        throw new Error('Firestore has not been initialized');
-    }
-    return db;
-}
+const TABLE = 'time-entries';
 
 export async function getTimeEntries(): Promise<TimeEntry[]> {
-    try {
-        const snapshot = await getDocs(collection(getDb(), 'time-entries'));
-        if (snapshot.empty) {
-            console.log('No time entries found in Firestore.');
-            return [];
-        }
-        const list = snapshot.docs.map(doc => doc.data() as TimeEntry);
-        // Filter out entries without a date before sorting
-        return list
-            .filter(entry => entry.date)
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    } catch (error) {
-        console.error("Error fetching time entries: ", error);
-        throw new Error("Could not fetch time entries.");
-    }
+  const { data, error } = await supabase.from(TABLE).select('*');
+  if (error) {
+    console.error('Error fetching time entries: ', error);
+    throw new Error('Could not fetch time entries.');
+  }
+  return (data ?? [])
+    .filter((entry: TimeEntry) => entry.date)
+    .sort(
+      (a: TimeEntry, b: TimeEntry) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
 }
 
 export async function addTimeEntry(entry: Omit<TimeEntry, 'id'>): Promise<TimeEntry> {
-    try {
-        const dbInstance = getDb();
-        const newId = doc(collection(dbInstance, 'time-entries')).id;
-        const newEntry: TimeEntry = { ...entry, id: newId };
-        await setDoc(doc(dbInstance, "time-entries", newId), newEntry);
-        return newEntry;
-    } catch (error) {
-        console.error("Error adding time entry: ", error);
-        throw new Error("Failed to add time entry.");
-    }
+  const { data, error } = await supabase
+    .from(TABLE)
+    .insert(entry)
+    .select()
+    .single();
+  if (error) {
+    console.error('Error adding time entry: ', error);
+    throw new Error('Failed to add time entry.');
+  }
+  return data!;
 }
 
 export async function updateTimeEntry(entry: TimeEntry): Promise<void> {
-    try {
-        const entryRef = doc(getDb(), "time-entries", entry.id);
-        await setDoc(entryRef, entry, { merge: true });
-    } catch (error) {
-        console.error("Error updating time entry: ", error);
-        throw new Error("Failed to update time entry.");
-    }
+  const { error } = await supabase
+    .from(TABLE)
+    .update(entry)
+    .eq('id', entry.id);
+  if (error) {
+    console.error('Error updating time entry: ', error);
+    throw new Error('Failed to update time entry.');
+  }
 }
 
 export async function deleteTimeEntry(entryId: string): Promise<void> {
-    try {
-        await deleteDoc(doc(getDb(), "time-entries", entryId));
-    } catch (error) {
-        console.error("Error deleting time entry: ", error);
-        throw new Error("Failed to delete time entry.");
-    }
+  const { error } = await supabase.from(TABLE).delete().eq('id', entryId);
+  if (error) {
+    console.error('Error deleting time entry: ', error);
+    throw new Error('Failed to delete time entry.');
+  }
 }
-
-    

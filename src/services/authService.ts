@@ -1,38 +1,21 @@
-import { auth } from "@/lib/firebase";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
+import { supabase } from '@/lib/supabase';
 
-function getAuthInstance() {
-  if (!auth) {
-    throw new Error("Firebase Auth has not been initialized");
-  }
-  return auth;
+export async function signUp(email: string, password: string): Promise<void> {
+  const { error } = await supabase.auth.signUp({ email, password });
+  if (error) throw error;
 }
 
-export async function signUp(
-  email: string,
-  password: string
-): Promise<void> {
-  await createUserWithEmailAndPassword(getAuthInstance(), email, password);
-}
-
-export async function signIn(
-  email: string,
-  password: string
-): Promise<void> {
-  await signInWithEmailAndPassword(getAuthInstance(), email, password);
+export async function signIn(email: string, password: string): Promise<void> {
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
 }
 
 export async function signInWithGoogle(): Promise<void> {
-  const provider = new GoogleAuthProvider();
-  await signInWithPopup(getAuthInstance(), provider);
+  const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+  if (error) throw error;
 }
 
 export async function signOut(): Promise<void> {
-  await firebaseSignOut(getAuthInstance());
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
 }
