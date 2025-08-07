@@ -62,8 +62,8 @@ export default function HomePage() {
   const [monthlyProgress, setMonthlyProgress] = React.useState(0);
   const [completedCount, setCompletedCount] = React.useState(0);
   const [totalCount, setTotalCount] = React.useState(0);
-  const [isLogTimeOpen, setIsLogTimeOpen] = React.useState(false);
-  const [isAddTaskOpen, setIsAddTaskOpen] = React.useState(false);
+  const [isLogTimeOpen, setIsLogTimeOpen] = React.useState<boolean>(false);
+  const [isAddTaskOpen, setIsAddTaskOpen] = React.useState<boolean>(false);
   const [defaultDate, setDefaultDate] = React.useState("");
   const [monthlyHours, setMonthlyHours] = React.useState(0);
   const [monthlySalary, setMonthlySalary] = React.useState(0);
@@ -106,12 +106,22 @@ export default function HomePage() {
   }, [toast]);
   
   React.useEffect(() => {
-    if (user && teamMembers.length > 0) {
-      const userData = teamMembers.find(m => m.id === user.uid) || null;
-      setCurrentUserData(userData);
-      if (userData) {
-          setNotes(userData.notes || "");
-      }
+    if (!user || teamMembers.length === 0) return;
+
+    // Try to match by id (preferred), then fallback to email, then name (case-insensitive)
+    let userData = teamMembers.find(m => m.id === user.id || m.id === user.uid);
+    if (!userData && user.email) {
+      userData = teamMembers.find(m => m.email?.toLowerCase() === user.email.toLowerCase());
+    }
+    if (!userData && user.user_metadata?.full_name) {
+      userData = teamMembers.find(m => m.name?.toLowerCase() === user.user_metadata.full_name.toLowerCase());
+    }
+    if (!userData && user.user_metadata?.name) {
+      userData = teamMembers.find(m => m.name?.toLowerCase() === user.user_metadata.name.toLowerCase());
+    }
+    setCurrentUserData(userData || null);
+    if (userData) {
+      setNotes(userData.notes || "");
     }
   }, [user, teamMembers]);
 
@@ -130,7 +140,7 @@ export default function HomePage() {
 
     // Filter user tasks
     const userContent = content.filter(item => item.owner.toLowerCase() === currentUserData.name.toLowerCase());
-    
+
     const weekTasks = userContent.filter(item => {
       const deadline = new Date(item.deadline);
       return isWithinInterval(deadline, { start: startOfThisWeek, end: endOfThisWeek });
@@ -147,9 +157,9 @@ export default function HomePage() {
         const deadline = new Date(item.deadline);
         return isWithinInterval(deadline, { start: startOfThisMonth, end: endOfThisMonth });
     });
-    
+
     const completedThisMonth = assignedThisMonth.filter(item => item.status === 'Done');
-    
+
     setCompletedCount(completedThisMonth.length);
     setTotalCount(assignedThisMonth.length);
 
@@ -166,18 +176,31 @@ export default function HomePage() {
     setWeeklyAppointments(filteredAppointments);
     setWeekDates(eachDayOfInterval({ start: startOfThisWeek, end: endOfThisWeek }));
 
+    // Debug log: print current user's name, all time entry names, and all team members
+    if (typeof window !== 'undefined') {
+      console.log('[DEBUG] Current user name:', currentUserData.name);
+      console.log('[DEBUG] All time entry teamMember values:', timeEntries.map(e => e.teamMember));
+      console.log('[DEBUG] All team members:', teamMembers.map(m => ({ id: m.id, name: m.name })));
+      console.log('[DEBUG] user object:', user);
+    }
 
     // Calculate monthly time entries and salary
-    const userTimeEntriesThisMonth = timeEntries.filter(entry => {
+    let userTimeEntriesThisMonth: TimeEntry[] = [];
+    let hourlyRate = 0;
+    if (currentUserData) {
+      userTimeEntriesThisMonth = timeEntries.filter(entry => {
         const entryDate = new Date(entry.date);
-        return entry.teamMember.toLowerCase() === currentUserData.name.toLowerCase() &&
-               isWithinInterval(entryDate, { start: startOfThisMonth, end: endOfThisMonth });
-    });
-
+        // Match by teamMember name (case-insensitive, trimmed)
+        return (
+          entry.teamMember?.trim().toLowerCase() === currentUserData.name?.trim().toLowerCase() &&
+          isWithinInterval(entryDate, { start: startOfThisMonth, end: endOfThisMonth })
+        );
+      });
+      // Use ONLY the correct field name from Supabase: hourlyrate
+      hourlyRate = currentUserData.hourlyrate || 0;
+    }
     const totalHours = userTimeEntriesThisMonth.reduce((sum, entry) => sum + entry.duration, 0);
-    const hourlyRate = currentUserData.hourlyRate || 0;
     const salary = totalHours * hourlyRate;
-
     setMonthlyHours(totalHours);
     setMonthlySalary(salary);
 
@@ -224,17 +247,26 @@ export default function HomePage() {
     event.preventDefault();
     if (!currentUserData) return;
     const formData = new FormData(event.currentTarget);
-    const newEntryData: Omit<TimeEntry, "id"> = {
+    // Match tracking page: use team member id, map to name for DB
+    const teamMemberId = formData.get("teamMember") as string;
+    const teamMemberObj = teamMembers.find((m) => m.id === teamMemberId || m.name === teamMemberId);
+    const newEntryData = {
       date: formData.get("date") as string,
-      teamMember: formData.get("teamMember") as string,
+      name: teamMemberObj ? teamMemberObj.name : teamMemberId, // DB expects 'name'
       client: formData.get("client") as string,
       task: formData.get("task") as string,
       duration: parseFloat(formData.get("duration") as string),
     };
 
     try {
-      const newEntry = await addTimeEntry(newEntryData);
-      setTimeEntries([newEntry, ...timeEntries]);
+      const newEntry = await addTimeEntry(newEntryData as any);
+      setTimeEntries([
+        {
+          ...newEntry,
+          teamMember: newEntry.teamMember || '',
+        },
+        ...timeEntries,
+      ]);
       setIsLogTimeOpen(false);
       (event.target as HTMLFormElement).reset();
       toast({
@@ -242,11 +274,12 @@ export default function HomePage() {
         description: "Your time entry has been successfully saved.",
       });
     } catch (error) {
-       toast({
+      console.error('Error in handleLogTimeSubmit:', error);
+      toast({
         title: "Error",
         description: "Could not save time entry.",
         variant: "destructive"
-       });
+      });
     }
   };
 
@@ -330,6 +363,22 @@ export default function HomePage() {
   const welcomeName = currentUserData?.name || user.email?.split('@')[0] || '';
   const capitalizedName = welcomeName.charAt(0).toUpperCase() + welcomeName.slice(1);
 
+  // Fix: Always enable the buttons, but show a warning if currentUserData is not loaded
+  const handleLogTimeClick = () => {
+    if (!currentUserData) {
+      alert('User data not loaded yet. Please wait a moment and try again.');
+      return;
+    }
+    setIsLogTimeOpen(true);
+  };
+  const handleAddTaskClick = () => {
+    if (!currentUserData) {
+      alert('User data not loaded yet. Please wait a moment and try again.');
+      return;
+    }
+    setIsAddTaskOpen(true);
+  };
+
   return (
     <AppShell>
         <div className="flex flex-col gap-8">
@@ -338,11 +387,11 @@ export default function HomePage() {
                     <h1 className="text-3xl font-bold tracking-tight">Welcome back, {capitalizedName}!</h1>
                 </div>
                 <div className="flex gap-2">
-                    <Button onClick={() => setIsLogTimeOpen(true)} disabled={!currentUserData} variant="secondary">
+                    <Button onClick={handleLogTimeClick} variant="secondary">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Log Time
                     </Button>
-                    <Button onClick={() => setIsAddTaskOpen(true)} disabled={!currentUserData}>
+                    <Button onClick={handleAddTaskClick}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Add Task
                     </Button>
@@ -530,13 +579,13 @@ export default function HomePage() {
                   <Label htmlFor="teamMember" className="text-right">
                     Team Member
                   </Label>
-                   <Select name="teamMember" defaultValue={currentUserData?.name}>
+                  <Select name="teamMember" defaultValue={currentUserData ? currentUserData.id : undefined}>
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select a member" />
                     </SelectTrigger>
                     <SelectContent>
                       {teamMembers.map((member) => (
-                        <SelectItem key={member.id} value={member.name}>{member.name}</SelectItem>
+                        <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

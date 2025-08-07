@@ -23,7 +23,8 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      // The AuthProvider will handle the redirect
+      // Force redirect after sign-in
+      router.push("/home");
     } catch (error: any) {
       toast({
         title: "Sign-in failed",

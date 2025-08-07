@@ -38,7 +38,7 @@ export type TeamMember = {
     phone: string;
     role: 'Ägare' | 'Kreatör' | 'Ekonomi';
     assignedClients: string[];
-    hourlyRate: number;
+    hourlyrate: number;
     photoURL?: string;
     notes?: string;
 };
