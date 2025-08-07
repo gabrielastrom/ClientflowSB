@@ -1,0 +1,21 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+# https://firebase.google.com/docs/app-hosting/configure
+
+# The command to run to build your app
+build:
+  # The command to run to build your app
+  run: npm run build
+  # The output directory of your build
+  output: .next
+
+# The command to run to start your app
+run:
+  # The command to start your app
+  run: npm run start
+  # The port your app listens on
+  port: 3000
+
+runConfig:
+  # Increase this value if you'd like to automatically spin up
+  # more instances in response to increased traffic.
+  maxInstances: 1
