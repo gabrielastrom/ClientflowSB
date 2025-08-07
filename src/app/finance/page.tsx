@@ -177,7 +177,7 @@ export default function FinancePage() {
       })
       .reduce((total, entry) => total + entry.duration, 0);
     
-    const salary = hoursThisMonth * (member.hourlyRate || 0);
+    const salary = hoursThisMonth * (member.hourlyrate || 0);
     setCalculatedSalary(salary);
     setSalaryComment(`Salary for ${member.name} - ${expenseFormData.month}`);
 

@@ -382,7 +382,7 @@ export default function DashboardPage() {
 
     const updatedMember: TeamMember = {
         ...selectedMemberForRateEdit,
-        hourlyRate: newRate,
+        hourlyrate: newRate,
     };
 
     try {
@@ -628,7 +628,7 @@ export default function DashboardPage() {
                     <div className="mt-2 text-sm">
                       <div className="flex items-center gap-1.5">
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        <span>{(member.hourlyRate || 0).toLocaleString()} kr / hour</span>
+                        <span>{(member.hourlyrate || 0).toLocaleString()} kr / hour</span>
                       </div>
                     </div>
                   </div>
@@ -684,7 +684,7 @@ export default function DashboardPage() {
                     name="hourlyRate"
                     type="number"
                     step="0.01"
-                    defaultValue={selectedMemberForRateEdit.hourlyRate}
+                    defaultValue={selectedMemberForRateEdit.hourlyrate}
                     className="col-span-3"
                     required
                   />
