@@ -16,7 +16,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
-export default function EditArticlePage({ params }: { params: { slug: string } }) {
+// Next.js 15 passes `params` as a Promise in client components.
+// Unwrap it with React.use to access the actual values.
+export default function EditArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = React.use(params);
     const [article, setArticle] = React.useState<Article | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const router = useRouter();
@@ -26,7 +29,7 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
         async function fetchArticle() {
             setIsLoading(true);
             try {
-                const fetchedArticle = await getArticleBySlug(params.slug);
+                const fetchedArticle = await getArticleBySlug(slug);
                 setArticle(fetchedArticle);
             } catch (error) {
                 toast({ title: "Error", description: "Could not fetch article.", variant: "destructive" });
@@ -36,7 +39,7 @@ export default function EditArticlePage({ params }: { params: { slug: string } }
             }
         }
         fetchArticle();
-    }, [params.slug, toast, router]);
+    }, [slug, toast, router]);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();

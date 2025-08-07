@@ -10,11 +10,16 @@ export async function getTimeEntries(): Promise<TimeEntry[]> {
     throw new Error('Could not fetch time entries.');
   }
   return (data ?? [])
-    .filter((entry: TimeEntry) => entry.date)
-    .sort(
-      (a: TimeEntry, b: TimeEntry) =>
-        new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    .filter((entry: any) => entry.date)
+    .map((entry: any) => ({
+      id: entry.id,
+      date: entry.date,
+      teamMember: entry.name, // map DB field "name" to UI field "teamMember"
+      client: entry.client,
+      task: entry.task,
+      duration: entry.duration,
+    }))
+    .sort((a: TimeEntry, b: TimeEntry) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 
