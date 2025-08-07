@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { TimeEntry } from '@/lib/types';
 
-const TABLE = 'time-entries';
+const TABLE = 'time_entry';
 
 export async function getTimeEntries(): Promise<TimeEntry[]> {
   const { data, error } = await supabase.from(TABLE).select('*');
@@ -17,23 +17,51 @@ export async function getTimeEntries(): Promise<TimeEntry[]> {
     );
 }
 
-export async function addTimeEntry(entry: Omit<TimeEntry, 'id'>): Promise<TimeEntry> {
+
+
+// Accepts { date, name, client, task, duration }
+export async function addTimeEntry(entry: any): Promise<TimeEntry> {
+  const dbEntry = {
+    date: entry.date,
+    name: entry.name,
+    client: entry.client,
+    task: entry.task,
+    duration: entry.duration,
+  };
   const { data, error } = await supabase
     .from(TABLE)
-    .insert(entry)
+    .insert(dbEntry)
     .select()
     .single();
   if (error) {
     console.error('Error adding time entry: ', error);
     throw new Error('Failed to add time entry.');
   }
-  return data!;
+  // Patch: return as TimeEntry shape for UI
+  return {
+    id: data.id,
+    date: data.date,
+    teamMember: data.name,
+    client: data.client,
+    task: data.task,
+    duration: data.duration,
+  };
 }
 
-export async function updateTimeEntry(entry: TimeEntry): Promise<void> {
+
+
+// Accepts { id, date, name, client, task, duration }
+export async function updateTimeEntry(entry: any): Promise<void> {
+  const dbEntry = {
+    date: entry.date,
+    name: entry.name,
+    client: entry.client,
+    task: entry.task,
+    duration: entry.duration,
+  };
   const { error } = await supabase
     .from(TABLE)
-    .update(entry)
+    .update(dbEntry)
     .eq('id', entry.id);
   if (error) {
     console.error('Error updating time entry: ', error);

@@ -24,6 +24,22 @@ export function listenToTeamMembers(callback: (team: TeamMember[]) => void): () 
 }
 
 export async function upsertTeamMemberFromUser(user: User): Promise<void> {
+  // Fetch existing team member
+
+  const { data: existing, error: fetchError } = await supabase
+    .from(TABLE)
+    .select('role, hourlyrate')
+    .eq('id', user.id)
+    .single();
+
+  if (fetchError && fetchError.code !== 'PGRST116') { // ignore "row not found"
+    console.error('Error fetching team member for upsert:', fetchError);
+    throw new Error('Failed to fetch team member.');
+  }
+
+  const roleToUse = existing?.role || user.user_metadata?.role || 'Kreatör';
+  const hourlyRateToUse = existing?.hourlyrate ?? 150;
+
   const { error } = await supabase
     .from(TABLE)
     .upsert({
@@ -31,12 +47,12 @@ export async function upsertTeamMemberFromUser(user: User): Promise<void> {
       name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'New User',
       email: user.email || '',
       phone: user.phone || '',
-      role: user.user_metadata?.role || 'Kreatör',
+      role: roleToUse,
       assignedclients: [],
-      hourlyrate: 150,
+      hourlyrate: hourlyRateToUse,
       photourl: user.user_metadata?.avatar_url || '',
       notes: ''
-    }, { onConflict: ['id'] });
+    });
 
   if (error) {
     console.error('Error upserting team member: ', error);

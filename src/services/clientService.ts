@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { Client } from '@/lib/types';
 
-const TABLE = 'clients';
+const TABLE = 'client';
 
 export async function getClients(): Promise<Client[]> {
   const { data, error } = await supabase.from(TABLE).select('*');

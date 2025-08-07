@@ -188,25 +188,38 @@ export default function TrackingPage() {
   const handleLogTimeSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const newEntryData: Omit<TimeEntry, 'id'> = {
+    // Patch: match DB schema (name is team member name, not id, and field is 'name')
+    const teamMemberId = formData.get("teamMember") as string;
+    const teamMemberObj = teamMembers.find((m) => m.id === teamMemberId);
+    const newEntryData = {
       date: formData.get("date") as string,
-      teamMember: formData.get("teamMember") as string,
+      name: teamMemberObj ? teamMemberObj.name : teamMemberId, // DB expects 'name'
       client: formData.get("client") as string,
       task: formData.get("task") as string,
       duration: parseFloat(formData.get("duration") as string),
     };
 
     try {
-        const newEntry = await addTimeEntry(newEntryData);
-        setTimeEntries([newEntry, ...timeEntries]);
-        setIsLogTimeOpen(false);
-        (event.target as HTMLFormElement).reset();
-        toast({
-          title: "Time Logged",
-          description: "Your time entry has been successfully saved.",
-        });
+      console.log('Submitting new time entry:', newEntryData);
+      const newEntry = await addTimeEntry(newEntryData as any);
+      console.log('New entry returned from addTimeEntry:', newEntry);
+      // Ensure UI shape
+      setTimeEntries([
+        {
+          ...newEntry,
+          teamMember: newEntry.teamMember || '',
+        },
+        ...timeEntries,
+      ]);
+      setIsLogTimeOpen(false);
+      (event.target as HTMLFormElement).reset();
+      toast({
+        title: "Time Logged",
+        description: "Your time entry has been successfully saved.",
+      });
     } catch(error) {
-        toast({ title: "Error", description: "Could not save time entry.", variant: "destructive" });
+      console.error('Error in handleLogTimeSubmit:', error);
+      toast({ title: "Error", description: "Could not save time entry.", variant: "destructive" });
     }
   };
 
@@ -215,19 +228,22 @@ export default function TrackingPage() {
     if (!selectedEntry) return;
 
     const formData = new FormData(event.currentTarget);
-    const updatedEntry: TimeEntry = {
-      ...selectedEntry,
+    // Patch: match DB schema (name is team member name, not id, and field is 'name')
+    const editTeamMemberId = formData.get("teamMember") as string;
+    const editTeamMemberObj = teamMembers.find((m) => m.id === editTeamMemberId);
+    const updatedEntry = {
+      id: selectedEntry.id,
       date: formData.get("date") as string,
-      teamMember: formData.get("teamMember") as string,
+      name: editTeamMemberObj ? editTeamMemberObj.name : editTeamMemberId, // DB expects 'name'
       client: formData.get("client") as string,
       task: formData.get("task") as string,
       duration: parseFloat(formData.get("duration") as string),
     };
 
     try {
-        await updateTimeEntry(updatedEntry);
+        await updateTimeEntry(updatedEntry as any);
         setTimeEntries(
-          timeEntries.map((entry) => (entry.id === updatedEntry.id ? updatedEntry : entry))
+          timeEntries.map((entry) => (entry.id === updatedEntry.id ? { ...entry, ...updatedEntry, teamMember: updatedEntry.name } : entry))
         );
         setIsEditOpen(false);
         toast({
@@ -298,7 +314,7 @@ export default function TrackingPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {teamMembers.map((member) => (
-                          <SelectItem key={member.id} value={member.name}>{member.name}</SelectItem>
+                          <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -415,8 +431,8 @@ export default function TrackingPage() {
                     sortedTimeEntries.map((entry) => (
                       <TableRow key={entry.id}>
                         <TableCell>{entry.date}</TableCell>
-                        <TableCell className="font-medium">{entry.teamMember}</TableCell>
-                        <TableCell>{entry.client}</TableCell>
+        <TableCell className="font-medium">{entry.teamMember || '-'}</TableCell>
+                        <TableCell>{entry.client || '-'}</TableCell>
                         <TableCell>{entry.task}</TableCell>
                         <TableCell className="text-right">{entry.duration.toFixed(2)}</TableCell>
                         <TableCell>
@@ -474,7 +490,7 @@ export default function TrackingPage() {
                         <div className="flex justify-between items-start">
                             <div>
                                 <p className="font-semibold">{entry.task}</p>
-                                <p className="text-sm text-muted-foreground">{entry.client}</p>
+                                <p className="text-sm text-muted-foreground">{entry.client || '-'}</p>
                             </div>
                             <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -497,7 +513,7 @@ export default function TrackingPage() {
                             </DropdownMenu>
                         </div>
                         <div className="flex justify-between items-center text-sm text-muted-foreground">
-                            <span>{entry.teamMember}</span>
+                <span>{entry.teamMember || '-'}</span>
                             <span>{entry.date}</span>
                         </div>
                         <div className="flex justify-end items-center font-bold text-lg">
@@ -536,7 +552,7 @@ export default function TrackingPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {teamMembers.map((member) => (
-                          <SelectItem key={member.id} value={member.name}>{member.name}</SelectItem>
+                          <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

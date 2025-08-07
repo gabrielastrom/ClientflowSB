@@ -80,23 +80,28 @@ export default function TeamPage() {
 
   React.useEffect(() => {
     async function fetchClients() {
-        try {
-            const clientData = await getClients();
-            setClients(clientData);
-        } catch (error) {
-             toast({
-                title: "Error fetching clients",
-                description: "Could not load client data.",
-                variant: "destructive"
-            });
-        }
+      try {
+        const clientData = await getClients();
+        setClients(clientData);
+      } catch (error) {
+        toast({
+          title: "Error fetching clients",
+          description: "Could not load client data.",
+          variant: "destructive"
+        });
+      }
     }
-    
+
     fetchClients();
-    
-    const unsubscribeTeam = listenToTeamMembers((teamData) => {
-        setTeam(teamData);
-        setIsLoading(false);
+
+    // Patch: Map assignedclients (from DB) to assignedClients (UI)
+    const unsubscribeTeam = listenToTeamMembers((teamDataRaw: any[]) => {
+      const teamData = teamDataRaw.map((member) => ({
+        ...member,
+        assignedClients: member.assignedClients ?? member.assignedclients ?? [],
+      }));
+      setTeam(teamData);
+      setIsLoading(false);
     });
 
     return () => unsubscribeTeam();
@@ -163,22 +168,27 @@ export default function TeamPage() {
     if (!selectedMember) return;
 
     const formData = new FormData(event.currentTarget);
-    const updatedMember: TeamMember = {
+    // Patch: send assignedclients to DB, keep assignedClients for UI
+    // Patch: send assignedclients to DB, keep assignedClients for UI
+    const updatedMember: any = {
       ...selectedMember,
       name: formData.get("name") as string,
       email: formData.get("email") as string,
       phone: formData.get("phone") as string,
       role: formData.get("role") as TeamMember["role"],
       assignedClients: clientsForEdit,
+      assignedclients: clientsForEdit, // for DB
     };
 
     try {
-        await updateTeamMember(updatedMember);
-        setTeam(team.map((m) => (m.id === updatedMember.id ? updatedMember : m)));
-        setIsEditOpen(false);
-        toast({ title: "Success", description: "Team member updated successfully." });
+      // Remove assignedClients before sending to DB, only send assignedclients
+      const { assignedClients, ...toUpdate } = updatedMember;
+      await updateTeamMember(toUpdate);
+      setTeam(team.map((m) => (m.id === updatedMember.id ? { ...updatedMember, assignedclients: undefined } : m)));
+      setIsEditOpen(false);
+      toast({ title: "Success", description: "Team member updated successfully." });
     } catch (error) {
-        toast({ title: "Error", description: "Could not update team member.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not update team member.", variant: "destructive" });
     }
   };
 
@@ -383,7 +393,7 @@ export default function TeamPage() {
       </Card>
       
       {/* Edit Dialog */}
-      <Dialog open={isEditOpen} onOpenChange={(open) => { setIsEditOpen(open); if(!open) setSelectedMember(null); }}>
+      <Dialog open={isEditOpen} onOpenChange={(open: boolean) => { setIsEditOpen(open); if(!open) setSelectedMember(null); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Team Member</DialogTitle>
@@ -445,7 +455,7 @@ export default function TeamPage() {
                             <Checkbox
                               id={`client-edit-${client.id}`}
                               checked={clientsForEdit.includes(client.name)}
-                              onCheckedChange={(checked) => handleClientSelectionChange(client.name, checked)}
+                              onCheckedChange={(checked: boolean | 'indeterminate') => handleClientSelectionChange(client.name, checked)}
                             />
                             {client.name}
                           </Label>
