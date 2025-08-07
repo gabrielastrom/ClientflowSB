@@ -31,11 +31,12 @@ export async function upsertTeamMemberFromUser(user: User): Promise<void> {
       name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'New User',
       email: user.email || '',
       phone: user.phone || '',
-      role: 'Kreatör',
-      assignedClients: [],
-      hourlyRate: 150,
-      photoURL: user.user_metadata?.avatar_url || '',
-    }, { onConflict: 'id' });
+      role: user.user_metadata?.role || 'Kreatör',
+      assignedclients: [],
+      hourlyrate: 150,
+      photourl: user.user_metadata?.avatar_url || '',
+      notes: ''
+    }, { onConflict: ['id'] });
 
   if (error) {
     console.error('Error upserting team member: ', error);
