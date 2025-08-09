@@ -393,14 +393,10 @@ export default function FinancePage() {
 
   return (
     <AppShell>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:justify-between sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Finance</h1>
-          <p className="text-muted-foreground">
-            Track your agency&apos;s revenue and financial performance.
-          </p>
-        </div>
-         <div className="flex gap-2">
+          <h1 className="text-3xl font-bold tracking-tight sm:pb-2">Finance</h1>
+          <div className="flex flex-col gap-2 mt-4 sm:mt-0 sm:flex-row">
             <Button onClick={() => setIsAddRevenueOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Revenue
@@ -409,7 +405,8 @@ export default function FinancePage() {
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Expense
             </Button>
-         </div>
+          </div>
+        </div>
       </div>
       <div className="grid gap-6">
         <Card>

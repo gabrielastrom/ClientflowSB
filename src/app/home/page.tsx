@@ -59,6 +59,7 @@ export default function HomePage() {
   
   const [weeklyTasks, setWeeklyTasks] = React.useState<Content[]>([]);
   const [monthlyTasks, setMonthlyTasks] = React.useState<Content[]>([]);
+  const [selectedUserId, setSelectedUserId] = React.useState<string | null>(null);
   const [monthlyProgress, setMonthlyProgress] = React.useState(0);
   const [completedCount, setCompletedCount] = React.useState(0);
   const [totalCount, setTotalCount] = React.useState(0);
@@ -127,9 +128,12 @@ export default function HomePage() {
 
 
   React.useEffect(() => {
-    if (!currentUserData) return;
+    // Use selected user or fallback to current user
+    const userObj = selectedUserId
+      ? teamMembers.find((m) => m.id === selectedUserId)
+      : currentUserData;
+    if (!userObj) return;
 
-    // Set default date on client-side
     setDefaultDate(new Date().toISOString().split("T")[0]);
 
     const today = new Date();
@@ -139,7 +143,7 @@ export default function HomePage() {
     const endOfThisMonth = endOfMonth(today);
 
     // Filter user tasks
-    const userContent = content.filter(item => item.owner.toLowerCase() === currentUserData.name.toLowerCase());
+    const userContent = content.filter(item => item.owner.toLowerCase() === userObj.name.toLowerCase());
 
     const weekTasks = userContent.filter(item => {
       const deadline = new Date(item.deadline);
@@ -179,45 +183,45 @@ export default function HomePage() {
     // Calculate monthly time entries and salary
     let userTimeEntriesThisMonth: TimeEntry[] = [];
     let hourlyRate = 0;
-    if (currentUserData) {
+    if (userObj) {
       userTimeEntriesThisMonth = timeEntries.filter(entry => {
         const entryDate = new Date(entry.date);
-        // Match by teamMember name (case-insensitive, trimmed)
         return (
-          entry.teamMember?.trim().toLowerCase() === currentUserData.name?.trim().toLowerCase() &&
+          entry.teamMember?.trim().toLowerCase() === userObj.name?.trim().toLowerCase() &&
           isWithinInterval(entryDate, { start: startOfThisMonth, end: endOfThisMonth })
         );
       });
-      // Use ONLY the correct field name from Supabase: hourlyrate
-      hourlyRate = currentUserData.hourlyrate || 0;
+      hourlyRate = userObj.hourlyrate || 0;
     }
     const totalHours = userTimeEntriesThisMonth.reduce((sum, entry) => sum + entry.duration, 0);
     const salary = totalHours * hourlyRate;
     setMonthlyHours(totalHours);
     setMonthlySalary(salary);
 
-  }, [timeEntries, content, currentUserData]);
+  }, [timeEntries, content, currentUserData, selectedUserId, teamMembers]);
 
-  // Debounced effect for saving notes
-  React.useEffect(() => {
+
+  // Manual save for notes
+  const [isSavingNotes, setIsSavingNotes] = React.useState(false);
+  const [notesSaved, setNotesSaved] = React.useState(false);
+
+  const handleNotesSave = async () => {
     if (!currentUserData || notes === (currentUserData.notes || '')) {
       return;
     }
-
-    const handler = setTimeout(async () => {
-      try {
-        await updateTeamMember({ ...currentUserData, notes });
-        // Optional: show a subtle saved indicator
-      } catch (error) {
-        console.error("Failed to save notes:", error);
-        toast({ title: "Error", description: "Failed to save your notes.", variant: "destructive" });
-      }
-    }, 1000); // Save after 1 second of inactivity
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [notes, currentUserData, toast]);
+    setIsSavingNotes(true);
+    setNotesSaved(false);
+    try {
+      await updateTeamMember({ ...currentUserData, notes });
+      setNotesSaved(true);
+      toast({ title: "Notes saved", description: "Your notes have been updated." });
+    } catch (error) {
+      console.error("Failed to save notes:", error);
+      toast({ title: "Error", description: "Failed to save your notes.", variant: "destructive" });
+    } finally {
+      setIsSavingNotes(false);
+    }
+  };
 
 
   const getStatusBadgeClassName = (status: 'To Do' | 'In Progress' | 'In Review' | 'Done') => {
@@ -328,20 +332,22 @@ export default function HomePage() {
       return <p className="text-muted-foreground text-center p-8">No tasks for this period. Great job!</p>;
     }
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 w-full">
         {tasks.map(task => (
-          <div 
-            key={task.id} 
-            className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+          <div
+            key={task.id}
+            className="flex items-center p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer w-full"
             onClick={() => onTaskClick(task)}
           >
-            <div>
-              <p className="font-semibold">{task.title}</p>
-              <p className="text-sm text-muted-foreground">{task.client} - Deadline: {format(new Date(task.deadline), 'MMM dd')}</p>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold truncate">{task.title}</p>
+              <p className="text-sm text-muted-foreground truncate">{task.client} - Deadline: {format(new Date(task.deadline), 'MMM dd')}</p>
             </div>
-            <Badge variant={'outline'} className={cn(getStatusBadgeClassName(task.status))}>
-              {task.status}
-            </Badge>
+            <div className="ml-4 flex-shrink-0">
+              <Badge variant={'outline'} className={cn(getStatusBadgeClassName(task.status))}>
+                {task.status}
+              </Badge>
+            </div>
           </div>
         ))}
       </div>
@@ -373,8 +379,8 @@ export default function HomePage() {
 
   return (
     <AppShell>
-        <div className="flex flex-col gap-8">
-            <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:items-center">
+        <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto px-2 lg:px-0">
+            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:items-center sm:text-left sm:items-center">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Welcome back, {capitalizedName}!</h1>
                 </div>
@@ -398,22 +404,47 @@ export default function HomePage() {
                             <CardDescription>Content assigned to you with deadlines this week and month.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Tabs defaultValue="month">
-                                <TabsList>
-                                    <TabsTrigger value="week">This Week</TabsTrigger>
-                                    <TabsTrigger value="month">This Month</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="week" className="mt-4">
-                                    <TaskList tasks={weeklyTasks} onTaskClick={handleTaskClick} />
-                                </TabsContent>
-                                <TabsContent value="month" className="mt-4">
-                                    <TaskList tasks={monthlyTasks} onTaskClick={handleTaskClick} />
-                                </TabsContent>
-                            </Tabs>
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="w-full">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
+                                        <div className="flex flex-col sm:flex-row sm:items-center w-full">
+                                            <Tabs defaultValue="month">
+                                                <div className="flex items-center gap-2 w-full">
+                                                    <TabsList className="flex-shrink-0">
+                                                        <TabsTrigger value="week">This Week</TabsTrigger>
+                                                        <TabsTrigger value="month">This Month</TabsTrigger>
+                                                    </TabsList>
+                                                    <div className="flex-1 flex justify-end">
+                                                        <Select
+                                                            value={selectedUserId || currentUserData?.id || ''}
+                                                            onValueChange={(val) => setSelectedUserId(val)}
+                                                        >
+                                                            <SelectTrigger className="min-w-[110px]">
+                                                                <SelectValue placeholder="Select user" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {teamMembers.map((member) => (
+                                                                    <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                                <TabsContent value="week" className="mt-4">
+                                                    <TaskList tasks={weeklyTasks} onTaskClick={handleTaskClick} />
+                                                </TabsContent>
+                                                <TabsContent value="month" className="mt-4">
+                                                    <TaskList tasks={monthlyTasks} onTaskClick={handleTaskClick} />
+                                                </TabsContent>
+                                            </Tabs>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    {/* <Card>
                         <CardHeader>
                             <CardTitle>Weekly Agenda</CardTitle>
                             <CardDescription>What's going on at BrandGuys this week!</CardDescription>
@@ -469,7 +500,7 @@ export default function HomePage() {
                               </div>
                             </ScrollArea>
                         </CardContent>
-                    </Card>
+                    </Card> */}
                 </div>
 
                 <div className="space-y-6">
@@ -531,21 +562,38 @@ export default function HomePage() {
                             </Button>
                         </CardContent>
                     </Card>
-                    <Card>
+                    {/* <Card>
                         <CardHeader>
                             <CardTitle>Notes</CardTitle>
                             <CardDescription>Your personal scratchpad for quick notes and reminders.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Textarea 
-                                placeholder="Type your notes here..." 
-                                className="h-48 resize-none"
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                disabled={!currentUserData} 
-                            />
+                            <form
+                              onSubmit={e => {
+                                e.preventDefault();
+                                handleNotesSave();
+                              }}
+                              className="flex flex-col gap-2"
+                            >
+                              <Textarea 
+                                  placeholder="Type your notes here..." 
+                                  className="h-48 resize-none"
+                                  value={notes}
+                                  onChange={(e) => {
+                                    setNotes(e.target.value);
+                                    setNotesSaved(false);
+                                  }}
+                                  disabled={!currentUserData || isSavingNotes} 
+                              />
+                              <div className="flex items-center gap-2 mt-2">
+                                <Button type="submit" disabled={!currentUserData || isSavingNotes || notes === (currentUserData?.notes || '')}>
+                                  {isSavingNotes ? 'Saving...' : 'Save Notes'}
+                                </Button>
+                                {notesSaved && <span className="text-green-600 text-sm">Saved!</span>}
+                              </div>
+                            </form>
                         </CardContent>
-                    </Card>
+                    </Card> */}
                 </div>
             </div>
         </div>

@@ -369,7 +369,7 @@ export default function CalendarPage() {
                     />
                 </CardContent>
             </Card>
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Notes</CardTitle>
                 <CardDescription>Your personal scratchpad for quick notes and reminders.</CardDescription>
@@ -383,7 +383,7 @@ export default function CalendarPage() {
                     disabled={!currentUserData} 
                 />
               </CardContent>
-            </Card>
+            </Card> */}
         </div>
       </div>
 

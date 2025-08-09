@@ -30,6 +30,7 @@ import {
   Sun,
   LogOut,
   BookOpen,
+  ListTodo,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -52,12 +53,12 @@ import { listenToTeamMembers } from "@/services/teamService";
 
 const navItems = [
   { href: "/home", icon: Home, label: "Home" },
-  { href: "/calendar", icon: Calendar, label: "Calendar" },
-  { href: "/clients", icon: Users, label: "Clients" },
-  { href: "/team", icon: Briefcase, label: "Team" },
-  { href: "/content", icon: Lightbulb, label: "Content" },
-  { href: "/tracking", icon: Clock, label: "Time Tracking" },
-  { href: "/knowledge-base", icon: BookOpen, label: "Knowledge Base" },
+  //{ href: "/calendar", icon: Calendar, label: "Calendar" },
+  { href: "/content", icon: ListTodo, label: "Tasks" },
+  { href: "/tracking", icon: Clock, label: "Time" },
+  { href: "/team", icon: Users, label: "Team" },
+  { href: "/knowledge-base", icon: BookOpen, label: "Knowledge" },
+  { href: "/clients", icon: Briefcase, label: "Clients" },
   { href: "/finance", icon: Banknote, label: "Finance" },
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
 ];
@@ -96,7 +97,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SidebarFooter>
             <SidebarMenu>
               <ThemeToggle />
-              <NavItem href="/settings" icon={Settings} label="Settings" />
+              {/* <NavItem href="/settings" icon={Settings} label="Settings" /> */}
               <UserMenu />
             </SidebarMenu>
           </SidebarFooter>

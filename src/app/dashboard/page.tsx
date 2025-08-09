@@ -541,7 +541,7 @@ export default function DashboardPage() {
               ))}
             </CardContent>
           </Card>
-          <Card>
+          {/* <Card>
               <CardHeader>
                   <CardTitle>Weekly Agenda</CardTitle>
                   <CardDescription>What's going on at BrandGuys this week!</CardDescription>
@@ -597,7 +597,7 @@ export default function DashboardPage() {
                     </div>
                   </ScrollArea>
               </CardContent>
-          </Card>
+          </Card> */}
         </div>
         <Card>
             <CardHeader>
@@ -647,7 +647,7 @@ export default function DashboardPage() {
               ))}
             </CardContent>
         </Card>
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Notes</CardTitle>
             <CardDescription>Your personal scratchpad for quick notes and reminders.</CardDescription>
@@ -661,7 +661,7 @@ export default function DashboardPage() {
                 disabled={!currentUserData} 
             />
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
        <Dialog open={isRateEditDialogOpen} onOpenChange={setIsRateEditDialogOpen}>
