@@ -5,18 +5,33 @@ import type { User } from '@supabase/supabase-js';
 const TABLE = 'team';
 
 export function listenToTeamMembers(callback: (team: TeamMember[]) => void): () => void {
+  // Helper to map Supabase row to TeamMember type
+  function mapTeamMember(row: any): TeamMember {
+    return {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      role: row.role,
+      assignedClients: row.assignedclients || [],
+      hourlyrate: row.hourlyrate,
+      photoURL: row.photourl,
+      notes: row.notes,
+    };
+  }
+
   const channel = supabase
     .channel('public:team')
     .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, async () => {
       const { data } = await supabase.from(TABLE).select('*');
-      callback(data ?? []);
+      callback((data ?? []).map(mapTeamMember));
     })
     .subscribe();
 
   supabase
     .from(TABLE)
     .select('*')
-    .then(({ data }: { data: TeamMember[] | null }) => callback(data ?? []));
+    .then(({ data }: { data: any[] | null }) => callback((data ?? []).map(mapTeamMember)));
 
   return () => {
     supabase.removeChannel(channel);
@@ -61,9 +76,21 @@ export async function upsertTeamMemberFromUser(user: User): Promise<void> {
 }
 
 export async function updateTeamMember(teamMember: TeamMember): Promise<void> {
+  // Map camelCase fields to Supabase snake_case columns
+  const updateObj: any = {
+    id: teamMember.id,
+    name: teamMember.name,
+    email: teamMember.email,
+    phone: teamMember.phone,
+    role: teamMember.role,
+    assignedclients: teamMember.assignedClients,
+    hourlyrate: teamMember.hourlyrate,
+    photourl: teamMember.photoURL,
+    notes: teamMember.notes,
+  };
   const { error } = await supabase
     .from(TABLE)
-    .update(teamMember)
+    .update(updateObj)
     .eq('id', teamMember.id);
   if (error) {
     console.error('Error updating team member: ', error);

@@ -89,30 +89,37 @@ export default function ContentPage() {
   const { toast } = useToast();
   
   React.useEffect(() => {
+    let isMounted = true;
     setDefaultDate(new Date().toLocaleDateString('en-CA'));
     async function fetchData() {
-        setIsLoading(true);
-        try {
-            const [contentData, clientData] = await Promise.all([
-                getContent(),
-                getClients(),
-            ]);
-            setContentList(contentData);
-            setClients(clientData);
-        } catch (error) {
-            toast({
-                title: "Error fetching data",
-                description: "Could not load data from the database.",
-                variant: "destructive"
-            });
-        } finally {
-            setIsLoading(false);
+      if (!isMounted) return;
+      setIsLoading(true);
+      try {
+        const [contentData, clientData] = await Promise.all([
+          getContent(),
+          getClients(),
+        ]);
+        if (!isMounted) return;
+        setContentList(contentData);
+        setClients(clientData);
+      } catch (error) {
+        if (isMounted) {
+          toast({
+            title: "Error fetching data",
+            description: "Could not load data from the database.",
+            variant: "destructive"
+          });
         }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
     }
     fetchData();
-    
     const unsubscribeTeam = listenToTeamMembers(setTeamMembers);
-    return () => unsubscribeTeam();
+    return () => {
+      isMounted = false;
+      unsubscribeTeam();
+    };
   }, [toast]);
 
 
@@ -364,7 +371,7 @@ export default function ContentPage() {
                           {item.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{item.deadline}</TableCell>
+                      <TableCell>{item.deadline ? new Date(item.deadline).toISOString().slice(0, 10) : ''}</TableCell>
                       <TableCell>{item.owner}</TableCell>
                       <TableCell>
                         {item.link ? (
@@ -451,8 +458,9 @@ export default function ContentPage() {
                           <Badge variant={'outline'} className={cn(getStatusBadgeClassName(item.status))}>
                             {item.status}
                           </Badge>
-                          <div className="text-muted-foreground">
-                              {item.deadline}
+                          <div className="flex flex-col items-end text-muted-foreground">
+                              <span>{item.deadline ? new Date(item.deadline).toISOString().slice(0, 10) : ''}</span>
+                              <span className="text-xs">{item.owner}</span>
                           </div>
                       </div>
                       </CardContent>

@@ -60,6 +60,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -87,41 +88,70 @@ export default function ClientsPage() {
   React.useEffect(() => {
     setDefaultDate(new Date().toLocaleDateString('en-CA'));
     async function fetchData() {
-        setIsLoading(true);
-        try {
-            const [clientsData, contentData] = await Promise.all([
-                getClients(),
-                getContent(),
-            ]);
-            setClients(clientsData);
-            setContentList(contentData);
-        } catch (error) {
-            toast({
-                title: "Error fetching data",
-                description: "Could not load data from the database.",
-                variant: "destructive"
-            });
-        } finally {
-            setIsLoading(false);
-        }
+      setIsLoading(true);
+      try {
+        const [clientsData, contentData] = await Promise.all([
+          getClients(),
+          getContent(),
+        ]);
+        setClients(clientsData);
+        setContentList(contentData);
+        // Initialize notes from documentation field
+        const notes: Record<string, string> = {};
+        clientsData.forEach((client) => {
+          notes[client.id] = client.documentation || '';
+        });
+        setClientNotes(notes);
+      } catch (error) {
+        toast({
+          title: "Error fetching data",
+          description: "Could not load data from the database.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
-    fetchData();
+    fetchData().catch((err) => {
+      setIsLoading(false);
+      toast({
+        title: "Unexpected error",
+        description: err?.message || String(err),
+        variant: "destructive"
+      });
+    });
   }, [toast]);
 
 
+  // Debounce update to Supabase
+  const debounceTimeout = useRef<Record<string, NodeJS.Timeout>>({});
   const handleNoteChange = (clientId: string, note: string) => {
     setClientNotes((prevNotes) => ({
       ...prevNotes,
       [clientId]: note,
     }));
+    // Debounce update to Supabase
+    if (debounceTimeout.current[clientId]) {
+      clearTimeout(debounceTimeout.current[clientId]);
+    }
+    debounceTimeout.current[clientId] = setTimeout(async () => {
+      const client = clients.find((c) => c.id === clientId);
+      if (client) {
+        try {
+          await updateClient({ ...client, documentation: note });
+        } catch (error) {
+          toast({ title: "Error", description: "Could not save documentation.", variant: "destructive" });
+        }
+      }
+    }, 600);
   };
 
   const sortedClients = React.useMemo(() => {
     let sortableItems = [...clients];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        const aValue = a[sortConfig.key];
-        const bValue = b[sortConfig.key];
+        const aValue = a[sortConfig.key] ?? '';
+        const bValue = b[sortConfig.key] ?? '';
         if (aValue < bValue) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
@@ -557,7 +587,7 @@ export default function ClientsPage() {
                                           {item.status}
                                         </Badge>
                                       </TableCell>
-                                      <TableCell>{item.deadline}</TableCell>
+                                      <TableCell>{item.deadline ? new Date(item.deadline).toISOString().slice(0, 10) : ''}</TableCell>
                                       <TableCell>{item.owner}</TableCell>
                                       <TableCell>
                                         {item.link ? (
@@ -632,7 +662,7 @@ export default function ClientsPage() {
                                         {item.status}
                                       </Badge>
                                       <div className="text-muted-foreground">
-                                          {item.deadline}
+                                          {item.deadline ? new Date(item.deadline).toISOString().slice(0, 10) : ''}
                                       </div>
                                     </div>
                                    </CardContent>
@@ -984,7 +1014,7 @@ export default function ClientsPage() {
                 </div>
                 <div className="grid grid-cols-3 items-center gap-2">
                     <Label className="text-muted-foreground">Deadline</Label>
-                    <p className="col-span-2 font-medium">{selectedContentItem.deadline}</p>
+                    <p className="col-span-2 font-medium">{selectedContentItem.deadline ? new Date(selectedContentItem.deadline).toISOString().slice(0, 10) : ''}</p>
                 </div>
                 <div className="grid grid-cols-3 items-center gap-2">
                     <Label className="text-muted-foreground">Owner</Label>

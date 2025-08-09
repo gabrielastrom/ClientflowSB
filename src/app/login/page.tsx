@@ -23,8 +23,9 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      // Force redirect after sign-in
+      // Force redirect after sign-in and reload to ensure session is picked up
       router.push("/home");
+      window.location.reload();
     } catch (error: any) {
       toast({
         title: "Sign-in failed",

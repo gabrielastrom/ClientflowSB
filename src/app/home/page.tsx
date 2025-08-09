@@ -176,14 +176,6 @@ export default function HomePage() {
     setWeeklyAppointments(filteredAppointments);
     setWeekDates(eachDayOfInterval({ start: startOfThisWeek, end: endOfThisWeek }));
 
-    // Debug log: print current user's name, all time entry names, and all team members
-    if (typeof window !== 'undefined') {
-      console.log('[DEBUG] Current user name:', currentUserData.name);
-      console.log('[DEBUG] All time entry teamMember values:', timeEntries.map(e => e.teamMember));
-      console.log('[DEBUG] All team members:', teamMembers.map(m => ({ id: m.id, name: m.name })));
-      console.log('[DEBUG] user object:', user);
-    }
-
     // Calculate monthly time entries and salary
     let userTimeEntriesThisMonth: TimeEntry[] = [];
     let hourlyRate = 0;
