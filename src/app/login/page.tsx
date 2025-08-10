@@ -23,9 +23,8 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      // Force redirect after sign-in and reload to ensure session is picked up
+      // Redirect after sign-in; AuthProvider will handle session
       router.push("/home");
-      window.location.reload();
     } catch (error: any) {
       toast({
         title: "Sign-in failed",

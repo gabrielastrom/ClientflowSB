@@ -13,7 +13,10 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} FLOW1 för BrandGuys
           </p>
-          <div className="flex items-center gap-x-6 py-12 sm:py-12">
+          <p className="text-sm text-muted-foreground">
+            How's my favorite branch doing?
+          </p>
+          <div className="flex items-center gap-x-6 py-12 sm:py-6">
             <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               Terms of Service
             </Link>

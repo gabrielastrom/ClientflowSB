@@ -6,7 +6,7 @@ import { AuthProvider } from '@/contexts/auth-context';
 
 export const metadata: Metadata = {
   title: 'FLOW1',
-  description: 'An ERP for a social media agency team. /Gabriel Strand',
+  description: 'The best ERP for a social media agency. /Gabriel Strand',
   manifest: '/manifest.json'
 };
 

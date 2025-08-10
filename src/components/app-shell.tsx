@@ -56,7 +56,7 @@ const navItems = [
   //{ href: "/calendar", icon: Calendar, label: "Calendar" },
   { href: "/content", icon: ListTodo, label: "Tasks" },
   { href: "/tracking", icon: Clock, label: "Time" },
-  { href: "/team", icon: Users, label: "Team" },
+  // { href: "/team", icon: Users, label: "Team" },
   { href: "/knowledge-base", icon: BookOpen, label: "Knowledge" },
   { href: "/clients", icon: Briefcase, label: "Clients" },
   { href: "/finance", icon: Banknote, label: "Finance" },
@@ -142,7 +142,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <UserMenu isMobile />
                 </div>
             </header>
-            <main className="flex-1 pt-14 p-4 sm:p-6 lg:p-8">
+            <main className="flex-1 pt-4 p-4 sm:p-6 lg:p-8">
                 {children}
             </main>
             <Footer />
@@ -252,7 +252,7 @@ function UserMenu({ isMobile = false }) {
                 src={displayPhoto}
                 alt={displayName}
               />
-              <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+              <AvatarFallback>{getInitials(displayName).toUpperCase()}</AvatarFallback>
             </Avatar>
           </Button>
         ) : (
@@ -262,10 +262,10 @@ function UserMenu({ isMobile = false }) {
                 src={displayPhoto}
                 alt={displayName}
               />
-              <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+              <AvatarFallback>{getInitials(displayName).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="group-data-[collapsible=icon]:hidden">
-              <p className="font-medium text-sm truncate">{displayName}</p>
+              <p className="font-medium text-sm truncate">{displayName.toUpperCase()}</p>
               <p className="text-xs text-muted-foreground truncate">
                 {displayEmail}
               </p>
@@ -278,15 +278,15 @@ function UserMenu({ isMobile = false }) {
         align="end"
         className="w-56"
       >
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <DropdownMenuLabel>Du använder FLOW1 v1.0 🌮</DropdownMenuLabel>
+        {/* <DropdownMenuSeparator />
+         <DropdownMenuItem asChild>
           <Link href="/settings">Settings</Link>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2">
           <LogOut className="h-4 w-4" />
-          <span>Log out</span>
+          <span>Logga ut</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

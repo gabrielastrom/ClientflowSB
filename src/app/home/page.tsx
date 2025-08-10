@@ -259,6 +259,7 @@ export default function HomePage() {
                                             {teamMembers.map((member) => (
                                                 <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
                                             ))}
+                                            <SelectItem key="other" value="Övrigt">Övrigt</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -464,7 +465,7 @@ export default function HomePage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {teamMembers.map((member) => (
-                                                <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                                                <SelectItem key={member.id} value={member.id}>{member.name.toUpperCase()}</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
@@ -755,18 +756,62 @@ export default function HomePage() {
         <Dialog open={isTaskStatusModalOpen} onOpenChange={setIsTaskStatusModalOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Update Task Status</DialogTitle>
+              <DialogTitle>Edit Task</DialogTitle>
               <DialogDescription>
-                Update the status for the task: "{selectedTask?.title}".
+                View and edit all information for the task: "{selectedTask?.title}".
               </DialogDescription>
             </DialogHeader>
             {selectedTask && (
-              <form onSubmit={handleStatusUpdateSubmit}>
+              <form
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  const formData = new FormData(event.currentTarget);
+                  const updatedTask = {
+                    ...selectedTask,
+                    title: formData.get("title") as string,
+                    client: formData.get("client") as string,
+                    deadline: formData.get("deadline") as string,
+                    description: formData.get("description") as string,
+                    status: formData.get("status") as Content["status"],
+                  };
+                  try {
+                    await updateContent(updatedTask);
+                    setContent(content.map(item => item.id === selectedTask.id ? updatedTask : item));
+                    setIsTaskStatusModalOpen(false);
+                    setSelectedTask(null);
+                  } catch (error) {
+                    toast({ title: "Error", description: "Could not update task.", variant: "destructive" });
+                  }
+                }}
+              >
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="status" className="text-right">
-                      Status
-                    </Label>
+                    <Label htmlFor="title" className="text-right">Title</Label>
+                    <Input id="title" name="title" className="col-span-3" defaultValue={selectedTask.title} required />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="client" className="text-right">Client</Label>
+                    <Select name="client" defaultValue={selectedTask.client}>
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue placeholder="Select a client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clients.map((client) => (
+                          <SelectItem key={client.id} value={client.name}>{client.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="deadline" className="text-right">Deadline</Label>
+                    <Input id="deadline" name="deadline" type="date" className="col-span-3" defaultValue={selectedTask.deadline?.slice(0,10)} required />
+                  </div>
+                  <div className="grid grid-cols-4 items-start gap-4">
+                    <Label htmlFor="description" className="text-right pt-2">Description</Label>
+                    <Textarea id="description" name="description" className="col-span-3" defaultValue={selectedTask.description || ""} />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="status" className="text-right">Status</Label>
                     <Select name="status" defaultValue={selectedTask.status}>
                       <SelectTrigger className="col-span-3">
                         <SelectValue placeholder="Select a status" />

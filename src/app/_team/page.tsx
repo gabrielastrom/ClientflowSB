@@ -59,7 +59,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { listenToTeamMembers, updateTeamMember, deleteTeamMember } from "@/services/teamService";
+import { listenToTeamMembers, deleteTeamMember } from "@/services/teamService";
 import { getClients } from "@/services/clientService";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -94,12 +94,24 @@ export default function TeamPage() {
 
     fetchClients();
 
-    // Patch: Map assignedclients (from DB) to assignedClients (UI)
+    // Förbättrad patch: Använd alltid värdet från DB om det finns, annars fallback
     const unsubscribeTeam = listenToTeamMembers((teamDataRaw: any[]) => {
-      const teamData = teamDataRaw.map((member) => ({
-        ...member,
-        assignedClients: member.assignedClients ?? member.assignedclients ?? [],
-      }));
+      const teamData = teamDataRaw.map((member) => {
+        let assignedClients = [];
+        if (Array.isArray(member.assignedClients) && member.assignedClients.length > 0) {
+          assignedClients = member.assignedClients;
+        } else if (Array.isArray(member.assignedclients) && member.assignedclients.length > 0) {
+          assignedClients = member.assignedclients;
+        } else if (Array.isArray(member.assignedClients)) {
+          assignedClients = member.assignedClients;
+        } else if (Array.isArray(member.assignedclients)) {
+          assignedClients = member.assignedclients;
+        }
+        return {
+          ...member,
+          assignedClients,
+        };
+      });
       setTeam(teamData);
       setIsLoading(false);
     });
@@ -163,34 +175,7 @@ export default function TeamPage() {
     }
   };
   
-  const handleEditSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!selectedMember) return;
-
-    const formData = new FormData(event.currentTarget);
-    // Patch: send assignedclients to DB, keep assignedClients for UI
-    // Patch: send assignedclients to DB, keep assignedClients for UI
-    const updatedMember: any = {
-      ...selectedMember,
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      phone: formData.get("phone") as string,
-      role: formData.get("role") as TeamMember["role"],
-      assignedClients: clientsForEdit,
-      assignedclients: clientsForEdit, // for DB
-    };
-
-    try {
-      // Remove assignedClients before sending to DB, only send assignedclients
-      const { assignedClients, ...toUpdate } = updatedMember;
-      await updateTeamMember(toUpdate);
-      setTeam(team.map((m) => (m.id === updatedMember.id ? { ...updatedMember, assignedclients: undefined } : m)));
-      setIsEditOpen(false);
-      toast({ title: "Success", description: "Team member updated successfully." });
-    } catch (error) {
-      toast({ title: "Error", description: "Could not update team member.", variant: "destructive" });
-    }
-  };
+  // Uppdatering av team-medlemmar är borttagen. All redigering sker direkt i Supabase.
 
   const handleDeleteMember = async () => {
     if (!selectedMember) return;
@@ -213,16 +198,16 @@ export default function TeamPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Team</h1>
           <p className="text-muted-foreground">
-            Manage your team members and their roles. New members are added when they sign up.
+            En översikt på alla i teamet på BrandGuys!
           </p>
         </div>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Team Members</CardTitle>
+          {/* <CardTitle>Team Members</CardTitle>
           <CardDescription>
             An overview of all team members in your agency.
-          </CardDescription>
+          </CardDescription> */}
         </CardHeader>
         <CardContent>
           {/* Desktop Table */}
@@ -306,7 +291,7 @@ export default function TeamPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <DropdownMenu>
+                        {/* <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button aria-haspopup="true" size="icon" variant="ghost">
                               <MoreHorizontal className="h-4 w-4" />
@@ -323,7 +308,7 @@ export default function TeamPage() {
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
-                        </DropdownMenu>
+                        </DropdownMenu> */}
                       </TableCell>
                     </TableRow>
                   ))
@@ -402,7 +387,7 @@ export default function TeamPage() {
             </DialogDescription>
           </DialogHeader>
           {selectedMember && (
-            <form onSubmit={handleEditSubmit}>
+            <form>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">Name</Label>
