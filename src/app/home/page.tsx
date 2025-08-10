@@ -59,6 +59,8 @@ export default function HomePage() {
   
   const [weeklyTasks, setWeeklyTasks] = React.useState<Content[]>([]);
   const [monthlyTasks, setMonthlyTasks] = React.useState<Content[]>([]);
+  // Period state for week/month select
+  const [period, setPeriod] = React.useState<'week' | 'month'>('month');
   const [selectedUserId, setSelectedUserId] = React.useState<string | null>(null);
   const [monthlyProgress, setMonthlyProgress] = React.useState(0);
   const [completedCount, setCompletedCount] = React.useState(0);
@@ -230,12 +232,45 @@ export default function HomePage() {
         return 'bg-green-500/20 text-green-700 border-green-500/20 hover:bg-green-500/30';
       case 'In Progress':
         return 'bg-blue-500/20 text-blue-700 border-blue-500/20 hover:bg-blue-500/30';
-      case 'In Review':
-        return 'bg-yellow-500/20 text-yellow-700 border-yellow-500/20 hover:bg-yellow-500/30';
-      case 'To Do':
-         return 'bg-gray-500/20 text-gray-700 border-gray-500/20 hover:bg-gray-500/30';
-      default:
-        return '';
+                        <CardContent>
+                            {/* Responsive layout: selects on one row, task list below, with good spacing */}
+                            <div className="flex flex-col gap-6">
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                                    <Select
+                                        value={period}
+                                        onValueChange={val => setPeriod(val as 'week' | 'month')}
+                                    >
+                                        <SelectTrigger className="w-full sm:w-48">
+                                            <SelectValue placeholder="Select period" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="week">Denna vecka</SelectItem>
+                                            <SelectItem value="month">Denna månad</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Select
+                                        value={selectedUserId || currentUserData?.id || ''}
+                                        onValueChange={(val) => setSelectedUserId(val)}
+                                    >
+                                        <SelectTrigger className="w-full sm:w-48">
+                                            <SelectValue placeholder="Select user" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {teamMembers.map((member) => (
+                                                <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="w-full">
+                                    {period === "week" ? (
+                                        <TaskList tasks={weeklyTasks} onTaskClick={handleTaskClick} />
+                                    ) : (
+                                        <TaskList tasks={monthlyTasks} onTaskClick={handleTaskClick} />
+                                    )}
+                                </div>
+                            </div>
+                        </CardContent>
     }
   };
 
@@ -379,19 +414,19 @@ export default function HomePage() {
 
   return (
     <AppShell>
-        <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto px-2 lg:px-0">
-            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:items-center sm:text-left sm:items-center">
+        <div className="flex flex-col gap-8 w-full mx-0 px-0 max-w-none">
+            <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:items-center sm:text-left sm:items-center px-0 w-full max-w-none">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Welcome back, {capitalizedName}!</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Välkommen, {capitalizedName}!</h1>
                 </div>
                 <div className="flex gap-2">
                     <Button onClick={handleLogTimeClick} variant="secondary">
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Log Time
+                        Logga tid
                     </Button>
                     <Button onClick={handleAddTaskClick}>
                         <PlusCircle className="mr-2 h-4 w-4" />
-                        Add Task
+                        Ny Task
                     </Button>
                 </div>
             </div>
@@ -400,45 +435,46 @@ export default function HomePage() {
                 <div className="lg:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>My Tasks</CardTitle>
-                            <CardDescription>Content assigned to you with deadlines this week and month.</CardDescription>
+                            <CardTitle>Mina Tasks</CardTitle>
+                            <CardDescription>Tasks med deadlines denna vecka/månad.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            {/* Responsive: selects above task list on large screens, stacked on small */}
+                            <div className="flex flex-col gap-6">
+                              <Progress value={monthlyProgress} className="w-full" />
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full mb-2">
+                                    <Select
+                                        value={period}
+                                        onValueChange={val => setPeriod(val as 'week' | 'month')}
+                                    >
+                                        <SelectTrigger className="w-full sm:w-48">
+                                            <SelectValue placeholder="Select period" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="week">Denna vecka</SelectItem>
+                                            <SelectItem value="month">Denna månad</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Select
+                                        value={selectedUserId || currentUserData?.id || ''}
+                                        onValueChange={(val) => setSelectedUserId(val)}
+                                    >
+                                        <SelectTrigger className="w-full sm:w-48">
+                                            <SelectValue placeholder="Select user" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {teamMembers.map((member) => (
+                                                <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <div className="w-full">
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
-                                        <div className="flex flex-col sm:flex-row sm:items-center w-full">
-                                            <Tabs defaultValue="month">
-                                                <div className="flex items-center gap-2 w-full">
-                                                    <TabsList className="flex-shrink-0">
-                                                        <TabsTrigger value="week">This Week</TabsTrigger>
-                                                        <TabsTrigger value="month">This Month</TabsTrigger>
-                                                    </TabsList>
-                                                    <div className="flex-1 flex justify-end">
-                                                        <Select
-                                                            value={selectedUserId || currentUserData?.id || ''}
-                                                            onValueChange={(val) => setSelectedUserId(val)}
-                                                        >
-                                                            <SelectTrigger className="min-w-[110px]">
-                                                                <SelectValue placeholder="Select user" />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {teamMembers.map((member) => (
-                                                                    <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                </div>
-                                                <TabsContent value="week" className="mt-4">
-                                                    <TaskList tasks={weeklyTasks} onTaskClick={handleTaskClick} />
-                                                </TabsContent>
-                                                <TabsContent value="month" className="mt-4">
-                                                    <TaskList tasks={monthlyTasks} onTaskClick={handleTaskClick} />
-                                                </TabsContent>
-                                            </Tabs>
-                                        </div>
-                                    </div>
+                                    {period === "week" ? (
+                                        <TaskList tasks={weeklyTasks} onTaskClick={handleTaskClick} />
+                                    ) : (
+                                        <TaskList tasks={monthlyTasks} onTaskClick={handleTaskClick} />
+                                    )}
                                 </div>
                             </div>
                         </CardContent>
@@ -504,10 +540,10 @@ export default function HomePage() {
                 </div>
 
                 <div className="space-y-6">
-                    <Card>
+                    {/* <Card>
                         <CardHeader>
-                            <CardTitle>Monthly Progress</CardTitle>
-                            <CardDescription>Your completed tasks for this month.</CardDescription>
+                            <CardTitle>Månadens Progress</CardTitle>
+                            <CardDescription>Dina avklarade tasks den här månaden.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="flex justify-between items-center mb-2">
@@ -516,24 +552,24 @@ export default function HomePage() {
                             </div>
                             <Progress value={monthlyProgress} className="w-full" />
                         </CardContent>
-                    </Card>
+                    </Card> */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Monthly Summary</CardTitle>
-                            <CardDescription>Your hours and estimated salary.</CardDescription>
+                            <CardTitle>Timmar & Bruttolön</CardTitle>
+                            <CardDescription>Månadens loggade timmar och bruttolön.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                     <Clock className="h-5 w-5" />
-                                    <span>Hours Logged</span>
+                                    <span>Timmar Loggade</span>
                                 </div>
                                 <span className="font-bold text-lg">{monthlyHours.toFixed(1)}h</span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                     <DollarSign className="h-5 w-5" />
-                                    <span>Estimated Salary</span>
+                                    <span>Beräknad Bruttolön</span>
                                 </div>
                                 <span className="font-bold text-lg">{monthlySalary.toLocaleString()} kr</span>
                             </div>
@@ -541,8 +577,8 @@ export default function HomePage() {
                     </Card>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Quick Access</CardTitle>
-                            <CardDescription>Core tools for your workflow.</CardDescription>
+                            <CardTitle>Snabblänkar</CardTitle>
+                            {/* <CardDescription>Genvägar till några viktiga verktyg!</CardDescription> */}
                         </CardHeader>
                         <CardContent className="grid grid-cols-3 gap-4">
                             <Button asChild>
@@ -551,12 +587,12 @@ export default function HomePage() {
                                 </Link>
                             </Button>
                             <Button asChild variant="secondary">
-                                <Link href="#">
+                                <Link href="https://discord.com/">
                                     Discord
                                 </Link>
                             </Button>
                              <Button asChild variant="secondary">
-                                <Link href="#">
+                                <Link href="https://www.lucidlink.com/">
                                     LucidLink
                                 </Link>
                             </Button>

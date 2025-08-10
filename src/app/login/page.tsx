@@ -59,20 +59,19 @@ export default function LoginPage() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center items-center gap-2">
             <Logo />
-            <span className="text-2xl font-bold">ClientFlow</span>
+            <span className="text-2xl font-bold">FLOW1</span>
           </div>
-          <CardDescription>
-            Enter your credentials to access your account
-          </CardDescription>
+          {/* <CardDescription>
+            Välkommen! 🥳
+          </CardDescription> */}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Mejl</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -80,7 +79,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Lösenord</Label>
               <Input 
                 id="password" 
                 type="password" 
@@ -91,18 +90,18 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? "Loggar in..." : "Logga in 🥳"}
             </Button>
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} type="button" disabled={isLoading}>
+            {/* <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} type="button" disabled={isLoading}>
               Sign in with Google
-            </Button>
+            </Button> */}
           </form>
-          <div className="mt-4 text-center text-sm">
+          {/* <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="underline">
               Sign up
             </Link>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

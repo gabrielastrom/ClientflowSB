@@ -73,7 +73,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex min-h-screen w-full">
         <Sidebar className="border-r bg-card">
           <SidebarHeader className="p-4 flex flex-row items-center justify-between group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:justify-center">
             <Link
@@ -82,7 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Logo />
               <span className="font-bold text-lg text-foreground">
-                ClientFlow
+                FLOW1
               </span>
             </Link>
             <SidebarTrigger className="hidden md:flex" />
@@ -102,7 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </SidebarMenu>
           </SidebarFooter>
         </Sidebar>
-        <SidebarInset>
+        <SidebarInset className="flex-1 w-full">
             <header className="sticky top-0 z-10 grid h-14 grid-cols-3 items-center border-b bg-card px-4 md:hidden">
                 <div className="flex justify-start">
                     <SidebarTrigger asChild>
@@ -134,7 +134,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     >
                     <Logo />
                     <span className="font-bold text-lg text-foreground">
-                        ClientFlow
+                        FLOW1
                     </span>
                     </Link>
                 </div>
@@ -142,7 +142,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     <UserMenu isMobile />
                 </div>
             </header>
-            <main className="flex-1 p-4 sm:p-6 lg:p-8">
+            <main className="flex-1 pt-14 p-4 sm:p-6 lg:p-8">
                 {children}
             </main>
             <Footer />
