@@ -1,6 +1,6 @@
 {
-  "name": "ClientFlow",
-  "short_name": "ClientFlow",
+  "name": "FLOW1",
+  "short_name": "FLOW1",
   "description": "An ERP for a small social media agency team.",
   "start_url": "/home",
   "display": "standalone",
