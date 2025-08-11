@@ -278,7 +278,7 @@ function UserMenu({ isMobile = false }) {
         align="end"
         className="w-56"
       >
-        <DropdownMenuLabel>Du använder FLOW1 v1.0 🌮</DropdownMenuLabel>
+        <DropdownMenuLabel>Du använder FLOW1 v1.1 🌮</DropdownMenuLabel>
         {/* <DropdownMenuSeparator />
          <DropdownMenuItem asChild>
           <Link href="/settings">Settings</Link>

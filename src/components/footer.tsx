@@ -8,10 +8,10 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2 text-foreground">
             <Logo />
-            <span className="font-bold">FLOW1</span>
+            <span className="font-bold">FLOW1 v1.1</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} FLOW1 för BrandGuys
+            &copy; {new Date().getFullYear()} BrandGuys
           </p>
           <p className="text-sm text-muted-foreground">
             How's my favorite branch doing?

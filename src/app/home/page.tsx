@@ -593,7 +593,7 @@ export default function HomePage() {
                                 </Link>
                             </Button>
                              <Button asChild variant="secondary">
-                                <Link href="https://www.lucidlink.com/">
+                                <Link href="https://app.lucidlink.com/workspaces/45436983-6f3f-4459-b1f0-b41318ab9830">
                                     LucidLink
                                 </Link>
                             </Button>

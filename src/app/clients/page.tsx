@@ -288,20 +288,20 @@ export default function ClientsPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
           <p className="text-muted-foreground">
-            Manage your client accounts and information.
+            Hantera clients och relaterad info.
           </p>
         </div>
         <Button onClick={() => setIsAddOpen(true)} disabled={isLoading}>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add Client
+          Ny Client
         </Button>
       </div>
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Client List</CardTitle>
+            <CardTitle>Client-Listan</CardTitle>
             <CardDescription>
-              A list of all clients in your agency.
+              En överblick av alla clients till bolaget.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -485,7 +485,7 @@ export default function ClientsPage() {
                         <div className="flex justify-between items-center text-sm">
                             {clientStatusBadge(client.status)}
                             <div className="text-muted-foreground">
-                                <span className="font-medium">{client.monthlyVideos}</span> videos/mo
+                                <span className="font-medium">{client.monthlyVideos}</span> videos / månad
                             </div>
                         </div>
                         </CardContent>
@@ -498,10 +498,9 @@ export default function ClientsPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Documentation</CardTitle>
+            <CardTitle>Dokumentation</CardTitle>
             <CardDescription>
-              Client-specific notes and documentation. Select a client to view
-              or edit their notes.
+              Client-specifika anteckningar och dokumentation.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -523,7 +522,7 @@ export default function ClientsPage() {
                 {sortedClients.map((client) => (
                   <TabsContent key={client.id} value={client.id}>
                     <Textarea
-                      placeholder={`Notes for ${client.name}...`}
+                      placeholder={`Anteckningar för ${client.name}...`}
                       className="mt-4 h-48 resize-none"
                       value={clientNotes[client.id] || ""}
                       onChange={(e) =>
@@ -538,9 +537,9 @@ export default function ClientsPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Client Content</CardTitle>
+            <CardTitle>Client Tasks</CardTitle>
             <CardDescription>
-              Content pipeline for each client.
+              Task pipelines för varje client separat.
             </CardDescription>
           </CardHeader>
           <CardContent>

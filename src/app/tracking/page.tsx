@@ -277,30 +277,30 @@ export default function TrackingPage() {
         {/* Page Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Time Tracking</h1>
+            <h1 className="text-3xl font-bold tracking-tight">Tid-logg</h1>
             <p className="text-muted-foreground">
-              Log and review time spent on clients and tasks.
+              Logga tid lagd på clients och internt.
             </p>
           </div>
           <Dialog open={isLogTimeOpen} onOpenChange={setIsLogTimeOpen}>
             <DialogTrigger asChild>
               <Button disabled={isLoading}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Log Time
+                Logga Tid
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Log New Time Entry</DialogTitle>
-                <DialogDescription>
-                  Fill in the details for your time log.
-                </DialogDescription>
+                <DialogTitle>Logga Tid ⏰</DialogTitle>
+                {/* <DialogDescription>
+                  Bra jobbat 🥳
+                </DialogDescription> */}
               </DialogHeader>
               <form onSubmit={handleLogTimeSubmit}>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="date" className="text-right">
-                      Date
+                      Datum
                     </Label>
                     <Input id="date" name="date" type="date" defaultValue={defaultDate} key={defaultDate} className="col-span-3" />
                   </div>
@@ -342,7 +342,7 @@ export default function TrackingPage() {
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="duration" className="text-right">
-                      Hours
+                      Timmar
                     </Label>
                     <Input id="duration" name="duration" type="number" step="0.01" placeholder="e.g., 1.5" className="col-span-3" required />
                   </div>
@@ -350,10 +350,10 @@ export default function TrackingPage() {
                 <DialogFooter>
                   <DialogClose asChild>
                     <Button type="button" variant="secondary">
-                      Cancel
+                      Avbryt
                     </Button>
                   </DialogClose>
-                  <Button type="submit">Save</Button>
+                  <Button type="submit">Spara</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -366,9 +366,9 @@ export default function TrackingPage() {
           <div className="md:w-2/3 flex-shrink-0">
             <Card>
               <CardHeader>
-                <CardTitle>Time Entries</CardTitle>
+                <CardTitle>Tid-tabellen</CardTitle>
                 <CardDescription>
-                  A log of all time tracked by the team.
+                  En lista av tidigare loggad tid för alla i teamet!
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -535,9 +535,9 @@ export default function TrackingPage() {
           <div className="md:w-1/3 flex-shrink-0">
             <Card>
               <CardHeader>
-                <CardTitle>Monthly Summary</CardTitle>
+                <CardTitle>Månads-Sammanställning</CardTitle>
                 <CardDescription>
-                  Total hours logged by each team member for the selected month.
+                  Totala timmar loggade för vald månad.
                 </CardDescription>
               </CardHeader>
               <CardContent>

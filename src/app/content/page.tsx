@@ -278,27 +278,27 @@ export default function ContentPage() {
     <AppShell>
        <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Content</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
           <p className="text-muted-foreground">
-            Manage all content production for your clients.
+            Allt som ska göras - internt och för clients.
           </p>
         </div>
         <Button onClick={() => setIsAddOpen(true)} disabled={isLoading}>
           <PlusCircle className="mr-2 h-4 w-4" />
-          Add Content
+          Ny Task
         </Button>
       </div>
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Content Pipeline</CardTitle>
+            <CardTitle>Task Pipeline</CardTitle>
             <div className="flex items-center space-x-2">
               <Switch 
                 id="current-month" 
                 checked={showCurrentMonthOnly}
                 onCheckedChange={setShowCurrentMonthOnly}
               />
-              <Label htmlFor="current-month">Current Month Only</Label>
+              <Label htmlFor="current-month">Bara denna månad</Label>
             </div>
           </div>
         </CardHeader>

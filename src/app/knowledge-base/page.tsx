@@ -64,12 +64,12 @@ export default function KnowledgeBasePage() {
         <div className="space-y-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Knowledge Base</h1>
-                    <p className="text-muted-foreground">Find guides, tutorials, and answers to your questions.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Knowledge</h1>
+                    <p className="text-muted-foreground">Guider, Tutorials, och vanliga Q&As.</p>
                 </div>
                  <Button onClick={() => setIsAddArticleOpen(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Article
+                    Nytt Inlägg
                 </Button>
             </div>
 
@@ -129,7 +129,7 @@ export default function KnowledgeBasePage() {
                                         <CardContent>
                                             <p className="text-sm text-muted-foreground line-clamp-3">{article.summary}</p>
                                             <div className="flex items-center justify-end text-sm font-medium text-primary mt-4 group-hover:underline">
-                                                Read more
+                                                Läs mer
                                                 <ChevronRight className="h-4 w-4 ml-1" />
                                             </div>
                                         </CardContent>

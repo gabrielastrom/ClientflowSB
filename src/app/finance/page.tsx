@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { type Revenue, type Client, type Expense, type TeamMember, type TimeEntry } from "@/lib/types";
-import { PlusCircle, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { PlusCircle, MoreHorizontal, ArrowUpDown, ArrowUp, ArrowDown, MinusCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -402,7 +402,7 @@ export default function FinancePage() {
                 Add Revenue
             </Button>
             <Button onClick={openAddExpenseDialog} variant="secondary">
-                <PlusCircle className="mr-2 h-4 w-4" />
+                <MinusCircle className="mr-2 h-4 w-4" />
                 Add Expense
             </Button>
           </div>
@@ -411,9 +411,9 @@ export default function FinancePage() {
       <div className="grid gap-6">
         <Card>
             <CardHeader>
-            <CardTitle>Revenue Log</CardTitle>
+            <CardTitle>Revenue</CardTitle>
             <CardDescription>
-                A detailed record of all incoming revenue.
+                En lista över bolagets intäkter.
             </CardDescription>
             </CardHeader>
             <CardContent>
@@ -557,9 +557,9 @@ export default function FinancePage() {
         
         <Card>
             <CardHeader>
-            <CardTitle>Expense Log</CardTitle>
+            <CardTitle>Expenses</CardTitle>
             <CardDescription>
-                A detailed record of all outgoing expenses.
+                En lista över bolagets utgifter.
             </CardDescription>
             </CardHeader>
             <CardContent>

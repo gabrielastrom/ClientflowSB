@@ -397,9 +397,9 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-center sm:text-left">Dashboard</h1>
         </div>
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -504,7 +504,7 @@ export default function DashboardPage() {
             </Card>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Team Performance</CardTitle>
               <CardDescription>Monthly stats for each team member.</CardDescription>
@@ -599,7 +599,7 @@ export default function DashboardPage() {
               </CardContent>
           </Card> */}
         </div>
-        <Card>
+        <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Hourly Rates</CardTitle>
               <CardDescription>Current hourly rates for each team member.</CardDescription>
