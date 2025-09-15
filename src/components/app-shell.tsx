@@ -61,6 +61,7 @@ const navItems = [
   { href: "/clients", icon: Briefcase, label: "Clients" },
   { href: "/finance", icon: Banknote, label: "Finance" },
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/notes", icon: Lightbulb, label: "Notes" },
 ];
 
 const publicRoutes = ["/login", "/signup"];
@@ -278,7 +279,7 @@ function UserMenu({ isMobile = false }) {
         align="end"
         className="w-56"
       >
-        <DropdownMenuLabel>Du använder FLOW1 v1.1 🌮</DropdownMenuLabel>
+        <DropdownMenuLabel>Du använder FLOW1 v1.2 🌮</DropdownMenuLabel>
         {/* <DropdownMenuSeparator />
          <DropdownMenuItem asChild>
           <Link href="/settings">Settings</Link>
