@@ -58,11 +58,11 @@ export default function LoginPage() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center items-center gap-2">
             <Logo />
-            <span className="text-2xl font-bold">FLOW1 v1.1</span>
+            <span className="text-2xl font-bold">FLOW1 v1.3</span>
           </div>
-          {/* <CardDescription>
-            Välkommen! 🥳
-          </CardDescription> */}
+          <CardDescription>
+            Nu med Trips och Gear! 🥳
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="grid gap-4">
