@@ -8,7 +8,7 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="flex items-center gap-2 text-foreground">
             <Logo />
-            <span className="font-bold">FLOW1 v1.2</span>
+            <span className="font-bold">FLOW1 v1.3</span>
           </div>
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} BrandGuys

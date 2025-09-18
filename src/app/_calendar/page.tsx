@@ -14,7 +14,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription as DialogHeaderDescription,
+  DialogDescription,
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
@@ -392,7 +392,7 @@ export default function CalendarPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Appointment</DialogTitle>
-            <DialogHeaderDescription>Fill in the details for your new event.</DialogHeaderDescription>
+            <DialogDescription>Fill in the details for your new event.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddSubmit}>
             <div className="grid gap-4 py-4">
@@ -460,7 +460,7 @@ export default function CalendarPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Appointment</DialogTitle>
-            <DialogHeaderDescription>Make changes to the appointment.</DialogHeaderDescription>
+            <DialogDescription>Make changes to the appointment.</DialogDescription>
           </DialogHeader>
           {selectedAppointment && (
             <form onSubmit={handleEditSubmit}>
@@ -530,9 +530,9 @@ export default function CalendarPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{selectedAppointment?.title}</DialogTitle>
-            <DialogHeaderDescription>
+            <DialogDescription>
               {selectedAppointment?.type} on {selectedAppointment && new Date(selectedAppointment.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} at {selectedAppointment && new Date(selectedAppointment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </DialogHeaderDescription>
+            </DialogDescription>
           </DialogHeader>
           {selectedAppointment && (
             <div className="grid gap-4 py-4 text-sm">

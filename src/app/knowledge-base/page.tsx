@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { listenToArticles, addArticle } from "@/services/knowledgeBaseService";
 import { type KnowledgeBaseArticle as Article } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription as DialogHeaderDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
@@ -148,7 +148,7 @@ export default function KnowledgeBasePage() {
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Add New Article</DialogTitle>
-                    <DialogHeaderDescription>Fill in the details for your new knowledge base article.</DialogHeaderDescription>
+                    <DialogDescription>Fill in the details for your new knowledge base article.</DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleAddArticleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -31,6 +31,8 @@ import {
   LogOut,
   BookOpen,
   ListTodo,
+  Car,
+  Wrench,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -56,6 +58,8 @@ const navItems = [
   //{ href: "/calendar", icon: Calendar, label: "Calendar" },
   { href: "/content", icon: ListTodo, label: "Tasks" },
   { href: "/tracking", icon: Clock, label: "Time" },
+  { href: "/trips", icon: Car, label: "Trips" },
+  { href: "/gear", icon: Wrench, label: "Gear" },
   // { href: "/team", icon: Users, label: "Team" },
   { href: "/knowledge-base", icon: BookOpen, label: "Knowledge" },
   { href: "/clients", icon: Briefcase, label: "Clients" },
@@ -68,13 +72,20 @@ const publicRoutes = ["/login", "/signup"];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { isNavigating } = useAuth();
+
   if (publicRoutes.includes(pathname)) {
     return <>{children}</>;
   }
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full relative">
+        {isNavigating && (
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="animate-pulse">Loading...</div>
+          </div>
+        )}
         <Sidebar className="border-r bg-card">
           <SidebarHeader className="p-4 flex flex-row items-center justify-between group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:justify-center">
             <Link
@@ -279,7 +290,7 @@ function UserMenu({ isMobile = false }) {
         align="end"
         className="w-56"
       >
-        <DropdownMenuLabel>Du använder FLOW1 v1.2 🌮</DropdownMenuLabel>
+        <DropdownMenuLabel>Du använder FLOW1 v1.3 🌮</DropdownMenuLabel>
         {/* <DropdownMenuSeparator />
          <DropdownMenuItem asChild>
           <Link href="/settings">Settings</Link>

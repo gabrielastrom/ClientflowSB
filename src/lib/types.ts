@@ -44,6 +44,26 @@ export type TeamMember = {
     notes?: string;
 };
 
+export type Trip = {
+    id: string;
+    startLocation: string;
+    destination: string;
+    distance: number;
+    teamMember: string;
+    date: string;
+};
+
+export type GearStatus = 'in_use' | 'available' | 'maintenance' | 'coming_soon';
+
+export type Gear = {
+    id: string;
+    name: string;
+    assignedTo: string | null;
+    status: GearStatus;
+    createdAt: string;
+    updatedAt: string;
+};
+
 export type Revenue = {
     id: string;
     revenue: number;
