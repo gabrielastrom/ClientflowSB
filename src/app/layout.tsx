@@ -27,6 +27,25 @@ export default function RootLayout({
 
       </head>
       <body className="font-body antialiased h-full" suppressHydrationWarning>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.ready.then(function(registration) {
+                    // Clear site data if needed
+                    if (localStorage.getItem('pwa_reset_needed') === 'true') {
+                      registration.unregister().then(function() {
+                        localStorage.removeItem('pwa_reset_needed');
+                        window.location.reload();
+                      });
+                    }
+                  });
+                });
+              }
+            `,
+          }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

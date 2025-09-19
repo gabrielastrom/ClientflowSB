@@ -23,16 +23,15 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      // Redirect after sign-in; AuthProvider will handle session
-      router.replace("/home");
+      // Let the AuthProvider handle the redirect
+      // Don't call router.replace here to avoid race conditions
     } catch (error: any) {
+      setIsLoading(false); // Only set loading to false on error
       toast({
         title: "Sign-in failed",
         description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
   

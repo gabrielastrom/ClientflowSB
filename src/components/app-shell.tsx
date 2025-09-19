@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -33,6 +32,7 @@ import {
   ListTodo,
   Car,
   Wrench,
+  DollarSign,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,7 +53,9 @@ import { useToast } from "@/hooks/use-toast";
 import type { TeamMember } from "@/lib/types";
 import { listenToTeamMembers } from "@/services/teamService";
 
-const navItems = [
+const ADMIN_EMAIL = "gabriel@brandguys.se";
+
+const getNavItems = (userEmail: string | undefined) => [
   { href: "/home", icon: Home, label: "Home" },
   //{ href: "/calendar", icon: Calendar, label: "Calendar" },
   { href: "/content", icon: ListTodo, label: "Tasks" },
@@ -63,8 +65,10 @@ const navItems = [
   // { href: "/team", icon: Users, label: "Team" },
   { href: "/knowledge-base", icon: BookOpen, label: "Knowledge" },
   { href: "/clients", icon: Briefcase, label: "Clients" },
-  { href: "/finance", icon: Banknote, label: "Finance" },
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  ...(userEmail === ADMIN_EMAIL ? [
+    { href: "/finance", icon: Banknote, label: "Finance" },
+    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  ] : []),
   { href: "/notes", icon: Lightbulb, label: "Notes" },
 ];
 
@@ -72,7 +76,7 @@ const publicRoutes = ["/login", "/signup"];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { isNavigating } = useAuth();
+  const { isNavigating, user } = useAuth();
 
   if (publicRoutes.includes(pathname)) {
     return <>{children}</>;
@@ -101,7 +105,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {getNavItems(user?.email).map((item) => (
                 <NavItem key={item.href} {...item} />
               ))}
             </SidebarMenu>

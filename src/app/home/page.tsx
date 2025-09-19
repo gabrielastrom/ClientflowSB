@@ -47,7 +47,7 @@ import { listenToTeamMembers, updateTeamMember } from "@/services/teamService";
 import { getContent, addContent, updateContent } from "@/services/contentService";
 import { getTimeEntries, addTimeEntry } from "@/services/timeTrackingService";
 import { getClients } from "@/services/clientService";
-
+import { isAdmin } from "@/lib/constants";
 
 export default function HomePage() {
   const { user } = useAuth();
@@ -248,20 +248,22 @@ export default function HomePage() {
                                             <SelectItem value="month">Denna månad</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    <Select
-                                        value={selectedUserId || currentUserData?.id || ''}
-                                        onValueChange={(val) => setSelectedUserId(val)}
-                                    >
-                                        <SelectTrigger className="w-full sm:w-48">
-                                            <SelectValue placeholder="Select user" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {teamMembers.map((member) => (
-                                                <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
-                                            ))}
-                                            <SelectItem key="other" value="Övrigt">Övrigt</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    {isAdmin(user?.email) && (
+                                      <Select
+                                          value={selectedUserId || currentUserData?.id || ''}
+                                          onValueChange={(val) => setSelectedUserId(val)}
+                                      >
+                                          <SelectTrigger className="w-full sm:w-48">
+                                              <SelectValue placeholder="Select user" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                              {teamMembers.map((member) => (
+                                                  <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                                              ))}
+                                              <SelectItem key="other" value="Övrigt">Övrigt</SelectItem>
+                                          </SelectContent>
+                                      </Select>
+                                    )}
                                 </div>
                                 <div className="w-full">
                                     {period === "week" ? (
@@ -365,7 +367,7 @@ export default function HomePage() {
 
   const TaskList = ({ tasks, onTaskClick }: { tasks: Content[], onTaskClick: (task: Content) => void }) => {
     if (tasks.length === 0) {
-      return <p className="text-muted-foreground text-center p-8">No tasks for this period. Great job!</p>;
+      return <p className="text-muted-foreground text-center p-8">Inga tasks just nu 🏖️</p>;
     }
     return (
       <div className="space-y-4 w-full">
@@ -456,19 +458,21 @@ export default function HomePage() {
                                             <SelectItem value="month">Denna månad</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    <Select
-                                        value={selectedUserId || currentUserData?.id || ''}
-                                        onValueChange={(val) => setSelectedUserId(val)}
-                                    >
-                                        <SelectTrigger className="w-full sm:w-48">
-                                            <SelectValue placeholder="Select user" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {teamMembers.map((member) => (
-                                                <SelectItem key={member.id} value={member.id}>{member.name.toUpperCase()}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    {isAdmin(user?.email) && (
+                                      <Select
+                                          value={selectedUserId || currentUserData?.id || ''}
+                                          onValueChange={(val) => setSelectedUserId(val)}
+                                      >
+                                          <SelectTrigger className="w-full sm:w-48">
+                                              <SelectValue placeholder="Select user" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                              {teamMembers.map((member) => (
+                                                  <SelectItem key={member.id} value={member.id}>{member.name.toUpperCase()}</SelectItem>
+                                              ))}
+                                          </SelectContent>
+                                      </Select>
+                                    )}
                                 </div>
                                 <div className="w-full">
                                     {period === "week" ? (

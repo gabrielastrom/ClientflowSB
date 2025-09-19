@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { User } from "@supabase/supabase-js";
+import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +31,8 @@ const protectedRoutes = [
     "/trips",
     "/knowledge-base",
     "/settings",
+    "/notes",
+    "/gear",
 ];
 
 const publicRoutes = ["/login", "/signup"];
@@ -43,17 +45,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   React.useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       const user = session?.user ?? null;
-      setIsNavigating(true);
-      if (user) {
-        await upsertTeamMemberFromUser(user);
-      }
       setUser(user);
       setIsLoading(false);
-      setIsNavigating(false);
+      if (user) {
+        upsertTeamMemberFromUser(user).catch(console.error);
+      }
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+      const user = session?.user ?? null;
+      setUser(user);
+      
+      if (event === 'SIGNED_IN' && user) {
+        try {
+          await upsertTeamMemberFromUser(user);
+        } catch (error) {
+          console.error('Failed to upsert team member:', error);
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -64,19 +79,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
     const isPublicRoute = publicRoutes.includes(pathname);
+    const shouldRedirect = (!user && isProtectedRoute) || (user && isPublicRoute);
 
-    if (!user && isProtectedRoute) {
+    if (shouldRedirect && !isNavigating) {
       setIsNavigating(true);
-      router.replace("/login");
-    } else if (user && isPublicRoute) {
-      setIsNavigating(true);
-      router.replace("/home");
+      const redirectTo = !user ? "/login" : "/home";
+      
+      // Use a timeout to ensure consistent navigation behavior
+      setTimeout(() => {
+        router.replace(redirectTo);
+      }, 0);
     }
-  }, [user, isLoading, pathname, router]);
+  }, [user, isLoading, pathname, router, isNavigating]);
 
-  // Reset navigation state when pathname changes
+  // Reset navigation state after navigation is complete
   React.useEffect(() => {
-    setIsNavigating(false);
+    const timeoutId = setTimeout(() => {
+      setIsNavigating(false);
+    }, 1000); // Give enough time for navigation to complete
+
+    return () => clearTimeout(timeoutId);
   }, [pathname]);
 
 
