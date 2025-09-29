@@ -51,6 +51,7 @@ export type Trip = {
     distance: number;
     teamMember: string;
     date: string;
+    purpose?: string;
 };
 
 export type GearStatus = 'in_use' | 'available' | 'maintenance' | 'coming_soon';

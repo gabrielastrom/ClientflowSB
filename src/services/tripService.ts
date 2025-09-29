@@ -9,7 +9,8 @@ export async function addTrip(trip: Omit<Trip, 'id'>): Promise<Trip> {
             destination: trip.destination,
             distance: trip.distance,
             team_member: trip.teamMember,
-            date: trip.date
+            date: trip.date,
+            purpose: trip.purpose
         }])
         .select()
         .single();
@@ -21,7 +22,8 @@ export async function addTrip(trip: Omit<Trip, 'id'>): Promise<Trip> {
         destination: data.destination,
         distance: data.distance,
         teamMember: data.team_member,
-        date: data.date
+        date: data.date,
+        purpose: data.purpose
     };
 }
 
@@ -38,7 +40,8 @@ export async function getTrips(): Promise<Trip[]> {
         destination: trip.destination,
         distance: trip.distance,
         teamMember: trip.team_member,
-        date: trip.date
+        date: trip.date,
+        purpose: trip.purpose
     }));
 }
 
@@ -50,7 +53,8 @@ export async function updateTrip(trip: Trip): Promise<Trip> {
             destination: trip.destination,
             distance: trip.distance,
             team_member: trip.teamMember,
-            date: trip.date
+            date: trip.date,
+            purpose: trip.purpose
         })
         .eq('id', trip.id)
         .select()
@@ -63,7 +67,8 @@ export async function updateTrip(trip: Trip): Promise<Trip> {
         destination: data.destination,
         distance: data.distance,
         teamMember: data.team_member,
-        date: data.date
+        date: data.date,
+        purpose: data.purpose
     };
 }
 

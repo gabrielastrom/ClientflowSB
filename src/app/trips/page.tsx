@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AppShell } from "@/components/app-shell";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Table,
   TableBody,
@@ -32,6 +33,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -100,8 +108,9 @@ export default function TripsPage() {
       startLocation: formData.get("startLocation") as string,
       destination: formData.get("destination") as string,
       distance: parseFloat(formData.get("distance") as string),
-      teamMember: getCurrentUserName(), // Use the function to get the current user's name
-      date: new Date().toISOString(),
+      teamMember: formData.get("teamMember") as string,
+      date: (formData.get("date") as string) || new Date().toISOString(),
+      purpose: formData.get("purpose") as string,
     };
 
     try {
@@ -127,7 +136,9 @@ export default function TripsPage() {
       startLocation: formData.get("startLocation") as string,
       destination: formData.get("destination") as string,
       distance: parseFloat(formData.get("distance") as string),
-      teamMember: getCurrentUserName(), // Use the function to get the current user's name
+      teamMember: formData.get("teamMember") as string,
+      date: formData.get("date") as string,
+      purpose: formData.get("purpose") as string
     };
 
     try {
@@ -221,12 +232,41 @@ export default function TripsPage() {
                   <Label htmlFor="teamMember" className="text-right">
                     Person
                   </Label>
+                  <Select name="teamMember" defaultValue={getCurrentUserName()} required>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select person" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teamMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.name}>
+                          {member.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="date" className="text-right">
+                    Datum
+                  </Label>
                   <Input
-                    id="teamMember"
-                    name="teamMember"
-                    defaultValue={teamMembers.find(member => member.email === user?.email)?.name || user?.email || ""}
+                    id="date"
+                    name="date"
+                    type="date"
+                    defaultValue={new Date().toISOString().split('T')[0]}
                     className="col-span-3"
                     required
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="purpose" className="text-right">
+                    Syfte
+                  </Label>
+                  <Input
+                    id="purpose"
+                    name="purpose"
+                    className="col-span-3"
+                    placeholder="T.ex. Kundmöte, Filmning"
                   />
                 </div>
               </div>
@@ -255,6 +295,7 @@ export default function TripsPage() {
                   <TableHead>Distans (km)</TableHead>
                   <TableHead>Person</TableHead>
                   <TableHead>Datum</TableHead>
+                  <TableHead>Syfte</TableHead>
                   <TableHead>
                     <span className="sr-only">Actions</span>
                   </TableHead>
@@ -285,6 +326,7 @@ export default function TripsPage() {
                       <TableCell>
                         {format(new Date(trip.date), "yyyy-MM-dd")}
                       </TableCell>
+                      <TableCell>{trip.purpose || "-"}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -344,6 +386,11 @@ export default function TripsPage() {
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
                         <div>
+                          {trip.purpose && (
+                            <p className="font-medium">
+                              {trip.purpose}
+                            </p>
+                          )}
                           <p className="font-medium">
                             {trip.startLocation} → {trip.destination}
                           </p>
@@ -447,12 +494,42 @@ export default function TripsPage() {
                   <Label htmlFor="teamMember" className="text-right">
                     Person
                   </Label>
+                  <Select name="teamMember" defaultValue={selectedTrip.teamMember} required>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select person" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teamMembers.map((member) => (
+                        <SelectItem key={member.id} value={member.name}>
+                          {member.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="date" className="text-right">
+                    Datum
+                  </Label>
                   <Input
-                    id="teamMember"
-                    name="teamMember"
-                    defaultValue={selectedTrip.teamMember}
+                    id="date"
+                    name="date"
+                    type="date"
+                    defaultValue={format(new Date(selectedTrip.date), "yyyy-MM-dd")}
                     className="col-span-3"
                     required
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="purpose" className="text-right">
+                    Syfte
+                  </Label>
+                  <Input
+                    id="purpose"
+                    name="purpose"
+                    defaultValue={selectedTrip.purpose}
+                    className="col-span-3"
+                    placeholder="T.ex. Kundmöte, Filmning"
                   />
                 </div>
               </div>
